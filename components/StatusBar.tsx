@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEasterEggs } from "@/components/easter-eggs/context";
 import { EGGS } from "@/components/easter-eggs/config";
 
 export default function StatusBar() {
   const { direction, setDirection, discovered, discover } = useEasterEggs();
   const [time, setTime] = useState<string>("");
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function tick() {
@@ -19,6 +20,27 @@ export default function StatusBar() {
     return () => clearInterval(id);
   }, []);
 
+  // Publish the bar's real height as a CSS var so .wm can reserve exactly
+  // enough padding, even when flex-wrap makes it taller on narrow screens.
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return;
+    const publish = () => {
+      document.documentElement.style.setProperty(
+        "--status-h",
+        `${el.offsetHeight}px`,
+      );
+    };
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    window.addEventListener("resize", publish);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", publish);
+    };
+  }, []);
+
   function cyclePulse() {
     const order: Array<"forward" | "paused" | "reverse"> = ["forward", "paused", "reverse"];
     const i = order.indexOf(direction);
@@ -28,7 +50,7 @@ export default function StatusBar() {
   }
 
   return (
-    <div className="status">
+    <div className="status" ref={barRef}>
       <span
         className="pulse clickable"
         onClick={cyclePulse}
