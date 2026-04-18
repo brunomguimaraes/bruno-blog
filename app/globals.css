@@ -30,6 +30,24 @@ body {
   font-family: var(--font-mono), ui-monospace, Menlo, monospace;
   overflow-x: hidden;
 }
+/* Body is the main column layout: status bar sits at natural height and
+   `.wm` / `<main>` stretches to fill the rest of the viewport. Prevents
+   the persistent outer scrollbar the old `.wm { min-height: 100vh }`
+   approach produced once the topbar went non-sticky (body total was
+   statusBar + 100vh, always overflowing by ~29px). 100dvh tracks mobile
+   URL-bar chrome so it doesn't shear off on iOS. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+/* Scroll-lock the document while a pane is bridge-zoomed, so the
+   background can't scroll behind the fullscreen overlay. `:has()` is
+   widely supported in 2024+ and degrades gracefully (the overlay still
+   covers the viewport; worst case the user can scroll behind it). */
+html:has(.wm.zoomed) {
+  overflow: hidden;
+}
 body::before {
   content: "";
   position: fixed;
@@ -144,6 +162,7 @@ a.link:hover {
    ========================================================= */
 .wm {
   display: grid;
+  position: relative; /* for absolutely-positioned splitters */
   gap: 10px;
   /* Topbar is in normal flow (non-sticky); only the bottom CommandBar is
      still position: fixed. It can wrap on narrow viewports, so CommandBar
@@ -153,13 +172,53 @@ a.link:hover {
   padding-bottom: calc(var(--cmd-h, 42px) + 8px);
   padding-left: 10px;
   padding-right: 10px;
-  min-height: 100vh;
-  grid-template-columns: 1.3fr 1fr;
+  /* Grow to fill the remaining body height (body is a flex column with
+     min-height: 100dvh). `min-height: 0` lets fr-sized rows compact below
+     intrinsic content size on short viewports; the mobile media query
+     below swaps the grid to a single column with auto rows and the body
+     scrolls normally in that case. */
+  flex: 1 1 auto;
+  min-height: 0;
+  /* The two column-width custom properties are set imperatively by
+     ColumnSplitter when the user drags the gutter (or via URL hash).
+     Defaults reproduce the old 1.3fr : 1fr proportions. */
+  --wm-col1: 1.3fr;
+  --wm-col2: 1fr;
+  grid-template-columns: var(--wm-col1) var(--wm-col2);
   grid-template-rows: 1.1fr 0.9fr 0.9fr;
   grid-template-areas:
     "hero whoami"
     "hero now"
     "blog contact";
+}
+
+/* Draggable vertical gutter between columns. Hidden on single-column layouts
+   and while bridge-zoom is active. The element is rendered on top of the
+   10px CSS gap at `calc(var(--wm-col1-fraction) * 100% - 4px)`. */
+.wm-splitter {
+  position: absolute;
+  z-index: 4;
+  background: transparent;
+  touch-action: none;
+  transition: background 120ms ease;
+}
+.wm-splitter-col {
+  top: 10px;
+  bottom: calc(var(--cmd-h, 42px) + 8px);
+  width: 8px;
+  cursor: col-resize;
+}
+.wm-splitter:hover {
+  background: rgba(137, 230, 255, 0.18);
+}
+.wm-splitter:focus-visible {
+  outline: none;
+  background: rgba(137, 230, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(137, 230, 255, 0.55);
+}
+.wm.zoomed .wm-splitter { display: none; }
+@media (max-width: 900px) {
+  .wm-splitter { display: none; }
 }
 @media (max-width: 900px) {
   .wm {
@@ -272,14 +331,59 @@ a.link:hover {
   100% { transform: translateY(100%); }
 }
 
-/* Tmux zoom */
+/* ─────────── Bridge zoom (tmux-style pane maximize) ───────────
+   Tab focuses a pane, Enter fullscreens it. This is *not* the Fullscreen
+   API — it's an in-app modal region (what VS Code, Linear, Figma, etc.
+   call "focus mode" / "maximize group"). The Fullscreen API hides the
+   whole browser chrome and is designed for video/presentation use; for
+   an app pane maximize it would remove the command bar and toasts from
+   view and violate user expectations on mobile.
+
+   Implementation: promote `.wm.zoomed` to a fixed overlay that covers the
+   viewport. Keeps the outer page scroll locked via `html:has(.wm.zoomed)
+   { overflow: hidden }` above. The zoomed pane gets a named view-
+   transition so the browser snapshots only that region when toggling
+   (smoother than cross-fading the entire page). Safe-area insets protect
+   notched devices; z-index sits above the non-sticky topbar (no z-index)
+   and below the fixed command bar (z-index 40) so the cmd bar stays
+   usable to dismiss the zoom. */
 .wm.zoomed {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-right: max(10px, env(safe-area-inset-right));
+  padding-bottom: calc(var(--cmd-h, 42px) + 8px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(10px, env(safe-area-inset-left));
   grid-template-columns: 1fr !important;
   grid-template-rows: 1fr !important;
   grid-template-areas: "z" !important;
 }
 .wm.zoomed .pane { display: none; }
-.wm.zoomed .pane.zoom-target { display: flex; grid-area: z; }
+.wm.zoomed .pane.zoom-target {
+  display: flex;
+  grid-area: z;
+  /* Named view-transition: the browser snapshots just this element when
+     toggling, so the zoom animates independently of the rest of the page
+     (instead of cross-fading the whole root). */
+  view-transition-name: bridge-zoom-pane;
+}
+/* In zoom, drop corner rounding for a true edge-to-edge fill. Looks
+   intentional at fullscreen scale and removes the awkward sliver of
+   background bleeding through the pane's 8px radius. */
+.wm.zoomed .pane.zoom-target { border-radius: 0; }
+
+/* Reduced motion: skip the named view-transition animation entirely. The
+   state change still happens, just instantly — which is the accessible
+   default for users with vestibular sensitivities. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(bridge-zoom-pane),
+  ::view-transition-new(bridge-zoom-pane) {
+    animation: none !important;
+  }
+}
 
 /* =========================================================
    Hero pane (rain + glitch name)
@@ -1006,3 +1110,81 @@ body.alarming { animation: bodyShake 0.06s infinite; }
 .prose-matrix li { margin: 0.3em 0; }
 .prose-matrix hr { border: 0; border-top: 1px solid var(--border); margin: 2.2em 0; }
 .prose-matrix strong { color: #eaf7ff; }
+
+/* ────────────── reading progress (scroll-driven CSS) ──────────────
+   The `.read-progress` bar is positioned along the top of the viewport
+   and scales from 0 → 1 on the horizontal axis, tied to scroll progress.
+   In browsers without `animation-timeline: scroll()` the bar stays at
+   scaleX(0) (invisible), which is exactly the fallback we want. The
+   `.read-end-sentinel` is a 1px spacer a React component watches via
+   IntersectionObserver to fire the "scroll-telemetry" egg.
+*/
+.read-progress {
+  position: fixed;
+  top: var(--status-h, 0px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #89e6ff, #1aa3ff, transparent);
+  transform: scaleX(0);
+  transform-origin: 0 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.85;
+}
+@supports (animation-timeline: scroll()) {
+  .read-progress {
+    animation: read-fill linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes read-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.read-end-sentinel {
+  height: 1px;
+  width: 100%;
+  margin-top: 40px;
+}
+
+/* Section-heading underlines that wipe in as the heading enters view.
+   Pure CSS, tied to `animation-timeline: view()`. No JS, no observer. */
+@supports (animation-timeline: view()) {
+  .prose-matrix h2 {
+    position: relative;
+  }
+  .prose-matrix h2::after {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-top: 0.35em;
+    background: linear-gradient(90deg, rgba(26, 163, 255, 0.55), transparent);
+    transform: scaleX(0);
+    transform-origin: 0 0;
+    animation: h2-wipe linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+  @keyframes h2-wipe {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+/* ────────────── view transitions (zoom + blog nav) ──────────────
+   When the View Transitions API is available the browser snapshots the
+   old and new DOM and cross-fades them. We tune the duration and easing
+   so the bridge-zoom toggle feels deliberate, not browser-default.
+*/
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms;
+  }
+}
