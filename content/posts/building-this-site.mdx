@@ -1,0 +1,42 @@
+---
+title: "Building this site — blue terminal aesthetic"
+date: "2026-04-16"
+tags: ["nextjs", "design"]
+description: "Architecture and design choices, warts and all."
+---
+
+A short tour of how this site is put together.
+
+## Stack
+
+- **Next.js 15** App Router with React 19 (RSC)
+- **Tailwind CSS** for layout utilities
+- **Plain CSS** for the heavy visual work (CRT scan, glitch clone trick, matrix rain)
+- **MDX** blog posts via `next-mdx-remote/rsc` + `gray-matter` frontmatter
+- **JetBrains Mono** via `next/font/google` — self-hosted, no FOUT
+
+## The hero
+
+The hero pane runs a real HTML canvas at 36fps (60% of 60fps, which looks calmer than full speed without feeling laggy). Blue palette: `#1aa3ff` body, `#89e6ff` highlight, `#eaf7ff` head. Drops reset randomly so columns feel organic.
+
+Two easter eggs hook into the rain directly:
+
+- The pulse dot in the status bar toggles direction: **forward → paused → reversed**.
+- Typing `matrix` anywhere triggers a 5-second storm at 2× speed.
+
+## The easter eggs
+
+They're organized as a self-contained feature module (`components/easter-eggs/`) with:
+
+- a **provider** that holds discovered-state and exposes a toast host,
+- a **config** file listing every egg and every command,
+- one component per overlay (help, palette, quake, screensaver, cyberterror alert),
+- a shared **hooks** file for `useKonami`, `useTypedWords`, `useIdle`, `useVimEscape`.
+
+A single global keydown listener in the provider dispatches to the right egg. The command palette is the canonical way to run every feature by name — so even if you can't remember a shortcut, you can `⌘K → "anomaly"`.
+
+## Blog infrastructure
+
+`lib/posts.ts` reads `content/posts/*.mdx` at request time (or build time for static params). Posts are server-rendered — no client JS for the reading experience, which keeps it fast and accessible.
+
+That's it. Code's on GitHub. If anything jumps out as wrong or interesting, email me.

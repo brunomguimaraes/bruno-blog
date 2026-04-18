@@ -1,0 +1,32 @@
+---
+title: "Calm on-call: three habits that saved my weekends"
+date: "2026-03-02"
+tags: ["oncall", "ops"]
+description: "Small rituals, big return."
+---
+
+On-call isn't supposed to ruin your weekend. After a few rotations where it did, I collected the handful of habits that actually moved the needle.
+
+## 1. Write the runbook before the fire
+
+Every alert I own has a runbook with three sections: **what fired**, **what to check first**, **how to resolve**. Ten minutes of writing today saves thirty minutes of 3am tab-switching later. The runbook lives one link away from the alert.
+
+## 2. Kill flappy alerts the morning after
+
+Any alert that paged me and resolved itself without my action gets ruthlessly re-evaluated the next morning. Either the threshold is wrong, the window is too short, or the thing is genuinely noisy and needs a different signal. I don't let "it's mostly fine" alerts live in my rotation.
+
+## 3. Post-incident review, even for the small ones
+
+Not the theater version. The five-line version:
+
+- What happened?
+- Why didn't we catch it earlier?
+- What's the smallest change that would've prevented it?
+- Who's doing it by when?
+- Anything to add to the runbook?
+
+That's it. No blame, no multi-page doc. Just a crisp thread the team can skim.
+
+---
+
+None of this is clever. It just compounds. Six months of doing these three things turned on-call from "brace for impact" into "probably nothing, but I'm ready."
