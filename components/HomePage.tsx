@@ -13,10 +13,17 @@ import {
 } from "@/components/Panes";
 import { useEasterEggs } from "@/components/easter-eggs/context";
 import type { Post } from "@/lib/posts";
+import type { NowEntry } from "@/lib/now";
 
 const PANE_ORDER = ["hero", "whoami", "now", "blog", "contact"];
 
-export default function HomePage({ posts }: { posts: Post[] }) {
+export default function HomePage({
+  posts,
+  nowEntries,
+}: {
+  posts: Post[];
+  nowEntries: NowEntry[];
+}) {
   const { zoomed, rootOn, focusedPane, setFocusedPane } = useEasterEggs();
   const wmRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +66,7 @@ export default function HomePage({ posts }: { posts: Post[] }) {
       <div className={wmClass} ref={wmRef}>
         <HeroPane />
         <WhoamiPane />
-        <NowPane />
+        <NowPane entries={nowEntries} />
         <BlogPane posts={posts} />
         <ContactPane />
         <RootPane />

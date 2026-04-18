@@ -6,6 +6,7 @@ import { useEasterEggs } from "@/components/easter-eggs/context";
 import MatrixRain from "@/components/MatrixRain";
 import GlitchText from "@/components/GlitchText";
 import type { Post } from "@/lib/posts";
+import type { NowEntry } from "@/lib/now";
 
 function PaneShell({
   id,
@@ -147,14 +148,19 @@ export function WhoamiPane() {
   );
 }
 
-export function NowPane() {
+export function NowPane({ entries }: { entries: NowEntry[] }) {
   return (
     <PaneShell id="now" title="now.log" num="[2]">
-      <div className="logline">→ shipping this site &amp; blog.</div>
-      <div className="logline">→ notes on calm on-call rotations.</div>
-      <div className="logline warn">! dependency audit queued.</div>
-      <div className="logline">→ weekend toy: a tiny typed event bus.</div>
-      <div className="logline err">× still avoiding my linkedin photos.</div>
+      {entries.map((e, i) => {
+        const prefix = e.kind === "ok" ? "→" : e.kind === "warn" ? "!" : "×";
+        const cls =
+          "logline" + (e.kind === "warn" ? " warn" : e.kind === "err" ? " err" : "");
+        return (
+          <div key={i} className={cls}>
+            {prefix} {e.text}
+          </div>
+        );
+      })}
     </PaneShell>
   );
 }
