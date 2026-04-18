@@ -2,7 +2,7 @@
   "name": "bruno-blog",
   "version": "0.1.0",
   "private": true,
-  "description": "Bruno Guimaraes — personal portfolio + blog. Warp bridge, blue warp drive. 13 hidden features.",
+  "description": "Bruno Guimaraes — personal portfolio + blog. Tiled panes, blue warp drive. 20 hidden features baked in.",
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",

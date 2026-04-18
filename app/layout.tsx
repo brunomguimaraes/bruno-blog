@@ -32,14 +32,61 @@ const SOURCE_BANNER = `
 -->
 `;
 
+const SITE_URL = "https://www.brunao.dev";
+const SITE_NAME = "bruno.dev";
+const SITE_TITLE = "Bruno Guimaraes — fullstack developer";
+const SITE_DESCRIPTION =
+  "Fullstack developer. Portfolio + blog living inside a terminal-flavored tiled workspace — 20 hidden features waiting to be found.";
+
 export const metadata: Metadata = {
-  title: "Bruno Guimaraes — fullstack developer",
-  description:
-    "Portfolio + blog. A terminal-flavored tiled workspace with 20 hidden features baked in.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: "%s — Bruno Guimaraes",
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: "Bruno Guimaraes", url: SITE_URL }],
+  creator: "Bruno Guimaraes",
+  publisher: "Bruno Guimaraes",
+  keywords: [
+    "Bruno Guimaraes",
+    "fullstack developer",
+    "web engineer",
+    "Next.js",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "portfolio",
+    "blog",
+    "terminal UI",
+  ],
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Bruno Guimaraes — fullstack developer",
-    description: "Portfolio + blog. Tiled panes, blue warp drive.",
     type: "website",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   other: {
     "x-bridge-hello":
