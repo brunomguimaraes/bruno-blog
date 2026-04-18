@@ -49,7 +49,7 @@ export default function CommandBar() {
           onClick={() => { setQuakeOpen(true); discover("quake"); }}
           style={{ cursor: "pointer" }}
         >
-          <kbd>⌃</kbd> + <kbd>`</kbd> console
+          <kbd>`</kbd> console
         </span>
         <span className="tab-hint">
           <kbd>Tab</kbd> focus · <kbd>Enter</kbd> zoom

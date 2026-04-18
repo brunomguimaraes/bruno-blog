@@ -8,7 +8,7 @@ export type EggDef = {
 export const EGGS: EggDef[] = [
   { id: "help", label: "Bridge manual", key: "?", hint: "Everything, one screen" },
   { id: "palette", label: "Ship's controls", key: "⌘/Ctrl + K", hint: "Run any feature by name" },
-  { id: "quake", label: "Bridge console", key: "Ctrl + `", hint: "Drop-down shell, real commands" },
+  { id: "quake", label: "Bridge console", key: "`", hint: "Drop-down shell, real commands" },
   { id: "rain-click", label: "Warp drive", key: "click the pulse", hint: "forward → paused → reverse" },
   { id: "storm", label: "Storm: weapons hot", key: 'type "storm"', hint: "5 seconds of chaos. buckle up." },
   { id: "verdant-mode", label: "Anomaly mode", key: "Konami code", hint: "Green bleeds through the blue" },
@@ -31,7 +31,7 @@ export type CommandDef = {
 
 export const COMMANDS: CommandDef[] = [
   { id: "help", label: "Show bridge manual", ico: "?", sh: "?", action: "openHelp" },
-  { id: "quake", label: "Open bridge console", ico: "⌘", sh: "Ctrl+`", action: "openQuake" },
+  { id: "quake", label: "Open bridge console", ico: "⌘", sh: "`", action: "openQuake" },
   { id: "storm", label: "Storm: weapons hot", ico: "⚡", sh: 'type "storm"', action: "triggerStorm" },
   { id: "verdant-mode", label: "Toggle anomaly mode", ico: "◆", sh: "↑↑↓↓←→←→BA", action: "toggleVerdant" },
   { id: "rain-pause", label: "Pause warp drive", ico: "⏸", action: "rainPause" },

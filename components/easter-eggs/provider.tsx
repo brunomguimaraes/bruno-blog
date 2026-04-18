@@ -62,22 +62,29 @@ export default function EasterEggsProvider({ children }: { children: React.React
     }, 4200);
   }, []);
 
+  // Use a ref mirror of `discovered` so `discover` can stay identity-stable
+  // and also avoid running the toast side-effect inside a setState updater
+  // (those are invoked twice in React strict mode, which would double-toast).
+  const discoveredRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    discoveredRef.current = discovered;
+  }, [discovered]);
+
   const discover = useCallback(
     (id: string) => {
-      setDiscovered((prev) => {
-        if (prev.has(id)) return prev;
-        const next = new Set(prev);
-        next.add(id);
-        const egg = EGGS.find((e) => e.id === id);
-        if (egg) {
-          toast({
-            head: `+1 egg · ${next.size}/${EGGS.length}`,
-            msg: egg.label,
-            sub: egg.hint,
-          });
-        }
-        return next;
-      });
+      if (discoveredRef.current.has(id)) return;
+      const next = new Set(discoveredRef.current);
+      next.add(id);
+      discoveredRef.current = next;
+      setDiscovered(next);
+      const egg = EGGS.find((e) => e.id === id);
+      if (egg) {
+        toast({
+          head: `+1 egg · ${next.size}/${EGGS.length}`,
+          msg: egg.label,
+          sub: egg.hint,
+        });
+      }
     },
     [toast],
   );
@@ -160,6 +167,16 @@ export default function EasterEggsProvider({ children }: { children: React.React
         });
         discover("captain-word");
       },
+      // "recon in the source" — only findable by reading the HTML comment
+      // in view-source (or the x-bridge-hello meta tag). See app/layout.tsx.
+      stowaway: () => {
+        toast({
+          head: "stowaway logged",
+          msg: "you read the source. welcome aboard.",
+          sub: "that's how i'd hire you.",
+        });
+        discover("stowaway");
+      },
     }),
     [triggerStorm, toggleVerdant, toast, discover],
   );
@@ -206,17 +223,6 @@ export default function EasterEggsProvider({ children }: { children: React.React
           target.tagName === "TEXTAREA" ||
           target.isContentEditable);
 
-      // Ctrl + `  — works even in inputs (the bridge console)
-      if (e.ctrlKey && e.key === "`") {
-        e.preventDefault();
-        setQuakeOpen((v) => {
-          const next = !v;
-          if (next) discover("quake");
-          return next;
-        });
-        return;
-      }
-
       if (e.key === "Escape") {
         if (paletteOpen) { setPaletteOpen(false); return; }
         if (helpOpen) { setHelpOpen(false); return; }
@@ -228,47 +234,45 @@ export default function EasterEggsProvider({ children }: { children: React.React
 
       if (isTyping) return;
 
+      // NOTE: `discover(...)` is called OUTSIDE the setState updater for
+      // every egg below. State updater fns must be pure, and React invokes
+      // them twice in strict mode — calling discover inside would toast
+      // twice. Current open/zoomed values come from the effect's closure.
+
       // ⌘/Ctrl + K → ship's controls
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setPaletteOpen((v) => {
-          const next = !v;
-          if (next) discover("palette");
-          return next;
-        });
+        setPaletteOpen((v) => !v);
+        if (!paletteOpen) discover("palette");
         return;
       }
 
-      // Bare backtick also opens the console
-      if (e.key === "`" && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      // Backtick opens / closes the console (ignored while typing in inputs).
+      // Match by physical key (e.code === "Backquote") so we catch dead-key
+      // layouts on macOS (US-International, ABC Extended, etc.) where the
+      // first press fires e.key === "Dead" and only a second press resolves
+      // to a literal backtick. Fall back to e.key for exotic physical maps.
+      const isBacktick = e.code === "Backquote" || e.key === "`";
+      if (isBacktick && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
-        setQuakeOpen((v) => {
-          const next = !v;
-          if (next) discover("quake");
-          return next;
-        });
+        setQuakeOpen((v) => !v);
+        if (!quakeOpen) discover("quake");
         return;
       }
 
       // ? → bridge manual
       if (e.key === "?") {
         e.preventDefault();
-        setHelpOpen((v) => {
-          const next = !v;
-          if (next) discover("help");
-          return next;
-        });
+        setHelpOpen((v) => !v);
+        if (!helpOpen) discover("help");
         return;
       }
 
       // Enter → bridge-zoom focused pane
       if (e.key === "Enter" && focusedPane) {
         e.preventDefault();
-        setZoomed((v) => {
-          const next = !v;
-          if (next) discover("zoom");
-          return next;
-        });
+        setZoomed((v) => !v);
+        if (!zoomed) discover("zoom");
       }
     }
     window.addEventListener("keydown", onKey);

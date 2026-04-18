@@ -162,7 +162,7 @@ export default function QuakeTerminal() {
       <header>
         <span>bridge · bruno</span>
         <span style={{ marginLeft: "auto", opacity: 0.6 }}>
-          Ctrl + ` to close · Esc to dismiss
+          Esc or `exit` to close
         </span>
       </header>
       <div className="b" ref={bodyRef}>

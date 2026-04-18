@@ -71,7 +71,7 @@ Press `?` in the running app to see the live bridge manual — it obscures undis
 | --- | --- |
 | `?` | Bridge manual (lists what you've found) |
 | `⌘K` / `Ctrl+K` | Ship's controls — run any feature by name |
-| `` Ctrl+` `` or `` ` `` | Bridge console (drop-down, with real commands) |
+| `` ` `` | Bridge console (drop-down, with real commands) |
 | `Tab` then `Enter` | Cycle pane focus, then bridge-zoom it |
 | click pulse dot | Warp drive: forward → paused → reverse |
 | click the hero title | Storm — 2× speed for 5s |
