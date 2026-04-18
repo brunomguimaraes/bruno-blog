@@ -64,6 +64,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // The actual <link rel="icon" | "apple-touch-icon"> tags are emitted
+  // automatically by Next.js from the file-based conventions:
+  //   app/favicon.ico      → multi-res (16/32/48) tab icon, fallback
+  //   app/icon.png         → 192×192 modern PNG favicon
+  //   app/apple-icon.png   → 180×180 iOS home-screen touch icon
+  // The manifest below points Chrome/Android at public/icon-{192,512}.png
+  // so PWA installs ("Add to Home Screen") get the right launcher icon.
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     url: SITE_URL,
