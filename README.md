@@ -1,6 +1,6 @@
 # bruno-blog
 
-Personal portfolio + blog. Space-outlaw terminal UI with a tiled "tmux workspace" layout — the bridge, in blue. Real canvas-based warp rain in the hero pane. **13 hidden features** to discover.
+Personal portfolio + blog. Space-outlaw terminal UI with a tiled "tmux workspace" layout — the bridge, in blue. Real canvas-based warp rain in the hero pane. **20 hidden features** to discover, a few of which would only show up on a senior-frontend code review.
 
 ## Stack
 
@@ -72,17 +72,24 @@ Press `?` in the running app to see the live bridge manual — it obscures undis
 | `?` | Bridge manual (lists what you've found) |
 | `⌘K` / `Ctrl+K` | Ship's controls — run any feature by name |
 | `` ` `` | Bridge console (drop-down, with real commands) |
-| `Tab` then `Enter` | Cycle pane focus, then bridge-zoom it |
+| `Tab` then `Enter` | Cycle pane focus, then bridge-zoom it (View Transitions API) |
 | click pulse dot | Warp drive: forward → paused → reverse |
 | click the hero title | Storm — 2× speed for 5s |
 | Konami code `↑↑↓↓←→←→BA` | Anomaly mode (green bleeds through the blue) |
 | type `storm` | "Boom. Weapons free." — 5s storm |
 | type `verdant` | Toggles the anomaly |
 | type `captain` | A legendary outlaw checks in |
+| type `stowaway` | Logs a find from the HTML comment in view-source |
 | console → `touch /hollow` | Dock at the hollowed husk |
 | console → `alarm` or `rm -rf /` | Breach Wave — shields up |
 | `:q` / `:wq` | Cheeky vim quit toast |
 | idle for 60 seconds | Deep space drift — screensaver takeover |
+| open DevTools | ASCII bridge banner + `window.bruno` debug API |
+| save-data / reduce-motion | Adaptive warp (rain slows to 2–6fps) |
+| read a post to the end | Scroll-driven progress bar + "end of log" toast |
+| open a second tab | Parallel bridge — eggs + warp sync via BroadcastChannel |
+| plug in a gamepad | Pilot mode — D-pad panes · A palette · Y storm · B alarm |
+| drag the column gutter | Reconfigure bulkheads — layout saved to the URL hash |
 
 ## Deploy
 

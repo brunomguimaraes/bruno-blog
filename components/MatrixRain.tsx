@@ -7,8 +7,15 @@ type Props = {
   className?: string;
 };
 
+// NetworkInformation is still experimental and not in lib.dom's stable types.
+// We declare what we actually read so we don't leak `any` through the file.
+type NetConn = {
+  saveData?: boolean;
+  effectiveType?: "slow-2g" | "2g" | "3g" | "4g" | string;
+};
+
 export default function MatrixRain({ className }: Props) {
-  const { registerRain } = useEasterEggs();
+  const { registerRain, discover, toast } = useEasterEggs();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -20,9 +27,43 @@ export default function MatrixRain({ className }: Props) {
     const ctx: CanvasRenderingContext2D = ctxMaybe;
 
     const FONT = 16;
+
+    // "Adaptive warp" — slow down (or freeze) the rain when the user
+    // signals they want less motion or less data. Comes in two flavours:
+    //   - navigator.connection says save-data / 2g / 3g → 6fps
+    //   - prefers-reduced-motion: reduce → 2fps (a very slow drift)
+    // Either case fires the "adaptive-warp" egg once.
+    const conn = (navigator as Navigator & { connection?: NetConn }).connection;
+    const saveData = !!conn?.saveData;
+    const slowNet =
+      conn?.effectiveType === "slow-2g" ||
+      conn?.effectiveType === "2g" ||
+      conn?.effectiveType === "3g";
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let baseFps = 18;
+    let adaptiveReason: string | null = null;
+    if (reduceMotion) {
+      baseFps = 2;
+      adaptiveReason = "reduce-motion";
+    } else if (saveData || slowNet) {
+      baseFps = 6;
+      adaptiveReason = saveData ? "save-data" : `net:${conn?.effectiveType}`;
+    }
+    if (adaptiveReason) {
+      discover("adaptive-warp");
+      toast({
+        head: "adaptive warp",
+        msg: `slow drift engaged · ${adaptiveReason}`,
+        sub: "the ship is courteous.",
+      });
+    }
+
     // 18fps baseline — a calm, "slow drift" warp rate.
     // Storm mode still kicks it up via `speedMul`/`stormTemp`.
-    const BASE_INTERVAL = 1000 / 18;
+    const BASE_INTERVAL = 1000 / baseFps;
     let direction: "forward" | "paused" | "reverse" = "forward";
     let speedMul = 1;
     let stormUntil = 0;
@@ -56,8 +97,30 @@ export default function MatrixRain({ className }: Props) {
 
     let raf = 0;
     let last = 0;
+    // Visible only when the canvas is intersecting the viewport AND the tab
+    // is foregrounded. When false we skip scheduling rAFs entirely — the
+    // rain is effectively free. (If we were willing to add a separate file
+    // for a worker, the natural next step would be to move the draw loop
+    // onto an OffscreenCanvas + Worker. For now, visibility-gated rAF is
+    // a bigger win than a worker anyway because a worker would keep going
+    // on a hidden tab.)
+    let inViewport = true;
+    let tabVisible = true;
+    const shouldRun = () => inViewport && tabVisible;
+
+    function schedule() {
+      if (raf || !shouldRun()) return;
+      raf = requestAnimationFrame(frame);
+    }
+    function unschedule() {
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
 
     function frame(ts: number) {
+      raf = 0;
+      if (!shouldRun()) return;
       raf = requestAnimationFrame(frame);
       const stormActive = ts < stormUntil;
       const mul = stormActive ? 2 : speedMul;
@@ -112,7 +175,28 @@ export default function MatrixRain({ className }: Props) {
       }
       ctx.shadowBlur = 0;
     }
-    raf = requestAnimationFrame(frame);
+    schedule();
+
+    // Pause drawing when canvas is scrolled out of view.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          inViewport = e.isIntersecting;
+          if (inViewport) schedule();
+          else unschedule();
+        }
+      },
+      { threshold: 0.01 },
+    );
+    io.observe(cvs);
+
+    // Pause drawing when the tab is hidden.
+    function onVisibility() {
+      tabVisible = document.visibilityState === "visible";
+      if (tabVisible) schedule();
+      else unschedule();
+    }
+    document.addEventListener("visibilitychange", onVisibility);
 
     const api = {
       setDirection(d: "forward" | "paused" | "reverse") {
@@ -128,11 +212,13 @@ export default function MatrixRain({ className }: Props) {
     registerRain(api);
 
     return () => {
-      cancelAnimationFrame(raf);
+      unschedule();
       ro.disconnect();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       registerRain(null);
     };
-  }, [registerRain]);
+  }, [registerRain, discover, toast]);
 
   return <canvas ref={canvasRef} className={"rain " + (className ?? "")} />;
 }

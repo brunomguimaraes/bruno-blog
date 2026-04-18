@@ -15,7 +15,20 @@ import QuakeTerminal from "./QuakeTerminal";
 import Screensaver from "./Screensaver";
 import CyberterrorAlert from "./CyberterrorAlert";
 import ToastHost, { type ToastItem } from "./ToastHost";
-import { useIdle, useKonami, useTypedWords, useVimEscape } from "./hooks";
+import {
+  useDevTools,
+  useIdle,
+  useKonami,
+  useTypedWords,
+  useVimEscape,
+} from "./hooks";
+import {
+  BRIDGE_SOURCE_URL,
+  printBridgeBanner,
+  printBrunoHelp,
+  type BridgeApi,
+} from "./bridge-console";
+import { withViewTransition } from "./view-transition";
 
 export default function EasterEggsProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -182,6 +195,100 @@ export default function EasterEggsProvider({ children }: { children: React.React
   );
   useTypedWords(typedMap);
 
+  // Bridge console handshake. When DevTools is opened we print a cyan
+  // ASCII banner, discover the egg, and ensure window.bruno is registered
+  // (it's also registered on mount; this is belt-and-braces for the egg).
+  useDevTools(
+    useCallback(() => {
+      printBridgeBanner();
+      discover("console");
+    }, [discover]),
+  );
+
+  // window.bruno — stable identity, methods always dispatch to the current
+  // closures via a ref so they never go stale across re-renders.
+  const bridgeApiRef = useRef<BridgeApi>({
+    storm: () => {},
+    alarm: () => {},
+    verdant: () => {},
+    warp: () => {},
+    dock: () => {},
+    saver: () => {},
+    listEggs: () => [],
+  });
+  useEffect(() => {
+    bridgeApiRef.current = {
+      storm: () => triggerStorm(),
+      alarm: () => triggerAlarm(),
+      verdant: () => toggleVerdant(),
+      warp: (d) => setDirection(d),
+      dock: () => setRootOn((v) => !v),
+      saver: () => setSaverOn(true),
+      listEggs: () =>
+        EGGS.map((e) => ({
+          id: e.id,
+          label: e.label,
+          found: discoveredRef.current.has(e.id),
+        })),
+    };
+  }, [triggerStorm, triggerAlarm, toggleVerdant]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    type BrunoApi = {
+      version: string;
+      source: string;
+      help: () => string;
+      eggs: () => ReturnType<BridgeApi["listEggs"]>;
+      storm: () => string;
+      alarm: () => string;
+      verdant: () => string;
+      warp: (d: RainDirection) => string;
+      dock: () => string;
+      saver: () => string;
+    };
+    const w = window as Window & { bruno?: BrunoApi };
+    w.bruno = {
+      version: "bridge-v1",
+      source: BRIDGE_SOURCE_URL,
+      help() {
+        printBrunoHelp();
+        return "see you in the palette.";
+      },
+      eggs() {
+        return bridgeApiRef.current.listEggs();
+      },
+      storm() {
+        bridgeApiRef.current.storm();
+        return "weapons free";
+      },
+      alarm() {
+        bridgeApiRef.current.alarm();
+        return "red alert";
+      },
+      verdant() {
+        bridgeApiRef.current.verdant();
+        return "anomaly toggled";
+      },
+      warp(d) {
+        bridgeApiRef.current.warp(d);
+        return `warp ${d}`;
+      },
+      dock() {
+        bridgeApiRef.current.dock();
+        return "docking at /hollow";
+      },
+      saver() {
+        bridgeApiRef.current.saver();
+        return "deep space drift engaged";
+      },
+    };
+    return () => {
+      const w2 = window as Window & { bruno?: BrunoApi };
+      delete w2.bruno;
+    };
+  }, []);
+
   // Vim escape
   useVimEscape(
     useCallback(() => {
@@ -192,6 +299,112 @@ export default function EasterEggsProvider({ children }: { children: React.React
       setQuakeOpen(false);
     }, [toast, discover]),
   );
+
+  // ────────────── BroadcastChannel: cross-tab bridge sync ──────────────
+  // When a second tab of the site is open, we sync discovered eggs + warp
+  // direction, and fire the "parallel-bridge" egg. Messages are tagged with
+  // a per-tab id so we never echo our own broadcasts.
+  const bcRef = useRef<BroadcastChannel | null>(null);
+  const tabIdRef = useRef<string>("");
+  const lastSentDirRef = useRef<RainDirection | null>(null);
+  const lastSentEggCountRef = useRef<number>(0);
+
+  type BridgeMsg =
+    | { type: "hello"; from: string }
+    | { type: "welcome"; from: string; ids: string[]; dir: RainDirection }
+    | { type: "eggs"; from: string; ids: string[] }
+    | { type: "warp"; from: string; dir: RainDirection }
+    | { type: "bye"; from: string };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") return;
+    tabIdRef.current = Math.random().toString(36).slice(2, 10);
+    const bc = new BroadcastChannel("bruno:bridge");
+    bcRef.current = bc;
+
+    let peerSeen = false;
+    const notePeer = () => {
+      if (peerSeen) return;
+      peerSeen = true;
+      discover("parallel-bridge");
+      toast({
+        head: "parallel bridge",
+        msg: "another tab is online.",
+        sub: "waypoints synced.",
+      });
+    };
+
+    function onMsg(ev: MessageEvent<BridgeMsg>) {
+      const m = ev.data;
+      if (!m || m.from === tabIdRef.current) return;
+      notePeer();
+      if (m.type === "hello") {
+        bc.postMessage({
+          type: "welcome",
+          from: tabIdRef.current,
+          ids: Array.from(discoveredRef.current),
+          dir: directionRef.current,
+        } as BridgeMsg);
+      }
+      if ((m.type === "eggs" || m.type === "welcome") && Array.isArray(m.ids)) {
+        const merged = new Set(discoveredRef.current);
+        let grew = false;
+        for (const id of m.ids) {
+          if (!merged.has(id)) {
+            merged.add(id);
+            grew = true;
+          }
+        }
+        if (grew) {
+          discoveredRef.current = merged;
+          lastSentEggCountRef.current = merged.size;
+          setDiscovered(merged);
+        }
+      }
+      if ((m.type === "welcome" || m.type === "warp") && "dir" in m && m.dir) {
+        lastSentDirRef.current = m.dir;
+        setDirection(m.dir);
+      }
+    }
+    bc.addEventListener("message", onMsg);
+    bc.postMessage({ type: "hello", from: tabIdRef.current } as BridgeMsg);
+
+    return () => {
+      bc.postMessage({ type: "bye", from: tabIdRef.current } as BridgeMsg);
+      bc.removeEventListener("message", onMsg);
+      bc.close();
+      bcRef.current = null;
+    };
+  }, [discover, toast]);
+
+  // Broadcast egg-set growth (ourselves → peers). We only post when the
+  // size grows, which means merging a remote broadcast is a no-op for us.
+  useEffect(() => {
+    const bc = bcRef.current;
+    if (!bc) return;
+    if (discovered.size > lastSentEggCountRef.current) {
+      lastSentEggCountRef.current = discovered.size;
+      bc.postMessage({
+        type: "eggs",
+        from: tabIdRef.current,
+        ids: Array.from(discovered),
+      } as BridgeMsg);
+    }
+  }, [discovered]);
+
+  // Broadcast warp direction changes (ours → peers).
+  useEffect(() => {
+    const bc = bcRef.current;
+    if (!bc) return;
+    if (direction !== lastSentDirRef.current) {
+      lastSentDirRef.current = direction;
+      bc.postMessage({
+        type: "warp",
+        from: tabIdRef.current,
+        dir: direction,
+      } as BridgeMsg);
+    }
+  }, [direction]);
 
   // Idle → screensaver (home only, flagged via data-home on <html>)
   useIdle(
@@ -268,10 +481,10 @@ export default function EasterEggsProvider({ children }: { children: React.React
         return;
       }
 
-      // Enter → bridge-zoom focused pane
+      // Enter → bridge-zoom focused pane (View Transitions–smooth)
       if (e.key === "Enter" && focusedPane) {
         e.preventDefault();
-        setZoomed((v) => !v);
+        withViewTransition(() => setZoomed((v) => !v));
         if (!zoomed) discover("zoom");
       }
     }
@@ -323,7 +536,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
           break;
         case "toggleZoom":
           if (focusedPane) {
-            setZoomed((v) => !v);
+            withViewTransition(() => setZoomed((v) => !v));
             discover("zoom");
           } else {
             toast({ head: "bridge zoom", msg: "Tab to focus a pane first." });
@@ -341,6 +554,15 @@ export default function EasterEggsProvider({ children }: { children: React.React
             }
             return next;
           });
+          break;
+        case "resetLayout":
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("bruno:reset-layout"));
+            toast({
+              head: "bulkheads reset",
+              msg: "columns back to factory spec.",
+            });
+          }
           break;
         case "goBlog":
           router.push("/blog");

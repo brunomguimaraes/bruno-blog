@@ -34,9 +34,23 @@ I wanted these to live in a single directory so I could rip the whole lot out if
 - a provider that owns the "what has the user discovered" state and a toast host,
 - a `config.ts` listing every egg and every command palette entry,
 - one component per overlay: help, palette, quake terminal, screensaver, the red-alert thing,
-- a `hooks.ts` with `useKonami`, `useTypedWords`, `useIdle`, `useVimEscape`.
+- a `hooks.ts` with `useKonami`, `useTypedWords`, `useIdle`, `useVimEscape`, `useDevTools`, `useGamepad`.
 
 One global keydown listener dispatches to whichever egg cares. The command palette (`⌘K`) is the canonical way to run any feature by name, which conveniently saves me from having to remember my own keyboard shortcuts.
+
+## The second wave
+
+The more interesting ones are the invisible ones — stuff you'd only stumble on if you were already poking at the internals:
+
+- A `<!-- -->` banner at the top of the rendered HTML that tells you which word to type next,
+- A DevTools handshake: open the console and a cyan ASCII bridge prints, plus `window.bruno` is wired with `help()`, `eggs()`, `storm()`, `warp(dir)`, and friends,
+- An "adaptive warp" path that reads `navigator.connection` (and `prefers-reduced-motion`) and drops the rain to 2–6fps if the user has signaled they'd rather not,
+- A scroll-driven CSS progress bar on blog posts, driven entirely by `animation-timeline: scroll()` — no scroll listeners,
+- Cross-tab sync via `BroadcastChannel`: open the site in two tabs and your discovered eggs + warp direction stay in lockstep,
+- Gamepad support: D-pad cycles panes, A opens the palette, Y triggers storm,
+- A draggable gutter between the two columns — your layout gets serialized into `#col=<ratio>`, so sharing the URL shares the view.
+
+The rain canvas also pauses itself via `IntersectionObserver` + Page Visibility, so scrolled-out-of-view and background tabs don't burn a single rAF.
 
 ## Blog infrastructure
 

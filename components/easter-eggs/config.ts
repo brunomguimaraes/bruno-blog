@@ -19,6 +19,14 @@ export const EGGS: EggDef[] = [
   { id: "zoom", label: "Bridge zoom", key: "Tab then Enter", hint: "Focus one pane, fullscreen it" },
   { id: "vim", label: "Old habits die hard", key: ":wq", hint: "For when you really need out" },
   { id: "konami-glitch", label: "Bridge stress test", key: "click the hero title", hint: "Break it a little harder" },
+  // second wave — world-class frontend-dev easter eggs
+  { id: "stowaway", label: "Recon in the source", key: 'view-source → type "stowaway"', hint: "A little welcome note in the HTML." },
+  { id: "console", label: "Engineer's console", key: "open DevTools", hint: "window.bruno is wired. try .help()" },
+  { id: "adaptive-warp", label: "Adaptive warp", key: "save-data or reduce-motion", hint: "The ship respects your bandwidth." },
+  { id: "scroll-telemetry", label: "Scroll telemetry", key: "read a post to the end", hint: "Reader knows you finished." },
+  { id: "parallel-bridge", label: "Parallel bridge", key: "open a second tab", hint: "Tabs sync eggs + warp direction." },
+  { id: "pilot-mode", label: "Pilot mode", key: "plug in a gamepad", hint: "D-pad panes · A palette · Y storm" },
+  { id: "reconfigure", label: "Reconfigure bulkheads", key: "drag the column gutter", hint: "Layout saves to the URL hash." },
 ];
 
 export type CommandDef = {
@@ -41,5 +49,6 @@ export const COMMANDS: CommandDef[] = [
   { id: "alarm", label: "Simulate red alert", ico: "!", action: "triggerAlarm" },
   { id: "zoom", label: "Bridge-zoom focused pane", ico: "⌗", sh: "Tab, Enter", action: "toggleZoom" },
   { id: "hollow", label: "Dock at /hollow", ico: "#", action: "toggleRoot" },
+  { id: "reset-layout", label: "Reset bulkheads (columns)", ico: "⇔", action: "resetLayout" },
   { id: "go-blog", label: "Go to /blog", ico: "→", action: "goBlog" },
 ];

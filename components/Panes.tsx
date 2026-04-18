@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactNode } from "react";
 import { useEasterEggs } from "@/components/easter-eggs/context";
+import { withViewTransition } from "@/components/easter-eggs/view-transition";
 import MatrixRain from "@/components/MatrixRain";
 import GlitchText from "@/components/GlitchText";
 import type { Post } from "@/lib/posts";
@@ -33,12 +34,19 @@ function PaneShell({
         className
       }
       style={{ gridArea: id }}
+      data-pane-id={id}
       tabIndex={0}
+      // When zoomed, the target pane behaves as a modal focus region:
+      // siblings are display:none (implicit focus trap), and we flag it
+      // as a region/dialog so screen readers announce the state change.
+      role={isZoomTarget ? "dialog" : "region"}
+      aria-modal={isZoomTarget || undefined}
+      aria-label={isZoomTarget ? `${title} — bridge zoom (Esc to exit)` : title}
       onFocus={() => setFocusedPane(id)}
       onClick={() => setFocusedPane(id)}
       onDoubleClick={() => {
         setFocusedPane(id);
-        setZoomed((z) => !z);
+        withViewTransition(() => setZoomed((z) => !z));
       }}
     >
       <header>
@@ -64,7 +72,11 @@ export function HeroPane() {
         (isZoomTarget ? "zoom-target " : "")
       }
       style={{ gridArea: "hero" }}
+      data-pane-id="hero"
       tabIndex={0}
+      role={isZoomTarget ? "dialog" : "region"}
+      aria-modal={isZoomTarget || undefined}
+      aria-label={isZoomTarget ? "hero — bridge zoom (Esc to exit)" : "hero"}
       onFocus={() => setFocusedPane("hero")}
     >
       <MatrixRain />
@@ -101,7 +113,7 @@ export function HeroPane() {
           <span className="caret" />
         </div>
         <div className="cmdline">
-          <span className="p">$</span> whoami && cat now.txt — <em>13 hidden features baked in</em>
+          <span className="p">$</span> whoami && cat now.txt — <em>20 hidden features baked in</em>
         </div>
         <div className="btns">
           <Link href="/blog" className="btn primary">read the blog</Link>
