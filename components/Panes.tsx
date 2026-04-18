@@ -113,7 +113,7 @@ export function HeroPane() {
           <span className="caret" />
         </div>
         <div className="cmdline">
-          <span className="p">$</span> whoami && cat now.txt — <em>20 hidden features baked in</em>
+          <span className="p">$</span> whoami && cat now.txt
         </div>
         <div className="btns">
           <Link href="/blog" className="btn primary">read the blog</Link>
