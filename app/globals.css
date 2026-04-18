@@ -176,6 +176,15 @@ a.link:hover {
     grid-template-rows: auto;
     grid-template-areas: "hero" "whoami" "now" "blog" "contact";
   }
+  /* Hero body is position: absolute; inset: 0, so the section has no
+     intrinsic height — it only inherits .pane { min-height: 220px }, which
+     is too short for title + lede + cmdline + 4 wrapping buttons on narrow
+     viewports and causes an internal overflow scrollbar. Give it a proper
+     tall-hero minimum so nothing gets clipped or scrolls inside the pane.
+     svh avoids iOS URL-bar jumpiness. */
+  .pane.hero {
+    min-height: clamp(480px, 78svh, 640px);
+  }
 }
 
 .pane {
