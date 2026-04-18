@@ -80,7 +80,7 @@ export default function Screensaver() {
   return (
     <div className={"saver" + (saverOn ? " show" : "")} aria-hidden={!saverOn}>
       <canvas ref={canvasRef} />
-      <div className="tag">MILANO · DRIFTING · PRESS ANY KEY</div>
+      <div className="tag">BRIDGE · DRIFTING · PRESS ANY KEY</div>
     </div>
   );
 }

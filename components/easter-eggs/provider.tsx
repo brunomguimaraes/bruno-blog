@@ -25,7 +25,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
   const toastIdRef = useRef(0);
 
   const [direction, setDirection] = useState<RainDirection>("forward");
-  const [groot, setGroot] = useState(false);
+  const [verdant, setVerdant] = useState(false);
   const [storm, setStorm] = useState(false);
   const [alarmOpen, setAlarmOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -37,13 +37,21 @@ export default function EasterEggsProvider({ children }: { children: React.React
   const [rootOn, setRootOn] = useState(false);
 
   const rainRef = useRef<RainAPI | null>(null);
+  // Keep direction in a ref so registerRain can stay identity-stable.
+  // Without this, the callback changes whenever `direction` changes, which
+  // would tear down and rebuild the entire MatrixRain canvas on every pulse
+  // click. See the separate effect below that syncs direction to the rain.
+  const directionRef = useRef<RainDirection>(direction);
+  useEffect(() => {
+    directionRef.current = direction;
+  }, [direction]);
 
   // toast helper
   const toast = useCallback((o: { head?: string; msg: string; sub?: string }) => {
     const id = ++toastIdRef.current;
     const item: ToastItem = {
       id,
-      head: o.head ?? "milano",
+      head: o.head ?? "bridge",
       msg: o.msg,
       sub: o.sub,
       at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -77,9 +85,9 @@ export default function EasterEggsProvider({ children }: { children: React.React
   const registerRain = useCallback(
     (api: RainAPI | null) => {
       rainRef.current = api;
-      if (api) api.setDirection(direction);
+      if (api) api.setDirection(directionRef.current);
     },
-    [direction],
+    [],
   );
 
   // keep rain in sync with direction state
@@ -89,8 +97,8 @@ export default function EasterEggsProvider({ children }: { children: React.React
 
   // body class side effects
   useEffect(() => {
-    document.body.classList.toggle("groot", groot);
-  }, [groot]);
+    document.body.classList.toggle("verdant", verdant);
+  }, [verdant]);
   useEffect(() => {
     document.body.classList.toggle("storm", storm);
   }, [storm]);
@@ -98,24 +106,24 @@ export default function EasterEggsProvider({ children }: { children: React.React
     document.body.classList.toggle("alarming", alarmOpen);
   }, [alarmOpen]);
 
-  const toggleGroot = useCallback(() => {
-    setGroot((v) => {
+  const toggleVerdant = useCallback(() => {
+    setVerdant((v) => {
       const next = !v;
       toast({
-        head: next ? "i am groot." : "groot stands down",
-        msg: next ? "We are Groot." : "Blue restored.",
+        head: next ? "anomaly engaged" : "anomaly stood down",
+        msg: next ? "green bleeds through." : "blue restored.",
       });
       return next;
     });
-    discover("groot-mode");
+    discover("verdant-mode");
   }, [discover, toast]);
 
   const triggerStorm = useCallback(() => {
     setStorm(true);
     rainRef.current?.stormTemp(5000);
     toast({
-      head: "rocket · weapons hot",
-      msg: "Blam! Murdered you!",
+      head: "storm · weapons hot",
+      msg: "Boom. Weapons free.",
       sub: "5 seconds of chaos — hold on",
     });
     setTimeout(() => setStorm(false), 5000);
@@ -128,32 +136,32 @@ export default function EasterEggsProvider({ children }: { children: React.React
     setTimeout(() => setAlarmOpen(false), 2400);
   }, [discover]);
 
-  // Konami → groot mode
+  // Konami → anomaly mode. Do NOT also discover "konami-glitch" here —
+  // that egg is the "click the hero title" one (see Panes.tsx HeroPane).
   useKonami(
     useCallback(() => {
-      toggleGroot();
-      discover("konami-glitch");
-    }, [toggleGroot, discover]),
+      toggleVerdant();
+    }, [toggleVerdant]),
   );
 
-  // Typed words — all GoG comic flavor
+  // Typed words — subtle nods. Storm is loud; the other two are nameless.
   const typedMap = useMemo(
     () => ({
-      rocket: () => triggerStorm(),
-      groot: () => {
-        toggleGroot();
-        discover("groot-word");
+      storm: () => triggerStorm(),
+      verdant: () => {
+        toggleVerdant();
+        discover("verdant-word");
       },
-      quill: () => {
+      captain: () => {
         toast({
-          head: "star-lord",
-          msg: "Peter Quill. Legendary outlaw.",
-          sub: "That's a thing now.",
+          head: "signal received",
+          msg: "a legendary outlaw left you a nod.",
+          sub: "if you know, you know.",
         });
-        discover("quill-word");
+        discover("captain-word");
       },
     }),
-    [triggerStorm, toggleGroot, toast, discover],
+    [triggerStorm, toggleVerdant, toast, discover],
   );
   useTypedWords(typedMap);
 
@@ -198,7 +206,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
           target.tagName === "TEXTAREA" ||
           target.isContentEditable);
 
-      // Ctrl + `  — works even in inputs (the Milano console)
+      // Ctrl + `  — works even in inputs (the bridge console)
       if (e.ctrlKey && e.key === "`") {
         e.preventDefault();
         setQuakeOpen((v) => {
@@ -242,7 +250,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
         return;
       }
 
-      // ? → Milano manual
+      // ? → bridge manual
       if (e.key === "?") {
         e.preventDefault();
         setHelpOpen((v) => {
@@ -284,8 +292,8 @@ export default function EasterEggsProvider({ children }: { children: React.React
         case "triggerStorm":
           triggerStorm();
           break;
-        case "toggleGroot":
-          toggleGroot();
+        case "toggleVerdant":
+          toggleVerdant();
           break;
         case "rainPause":
           setDirection("paused");
@@ -323,8 +331,8 @@ export default function EasterEggsProvider({ children }: { children: React.React
             if (next) {
               toast({
                 head: "docking",
-                msg: "Welcome to /knowhere.",
-                sub: "Watch your step. It's a head.",
+                msg: "welcome to /hollow.",
+                sub: "watch your step.",
               });
             }
             return next;
@@ -335,7 +343,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
           break;
       }
     },
-    [discover, toggleGroot, triggerStorm, triggerAlarm, focusedPane, router, toast],
+    [discover, toggleVerdant, triggerStorm, triggerAlarm, focusedPane, router, toast],
   );
 
   const value = useMemo<Ctx>(
@@ -346,8 +354,8 @@ export default function EasterEggsProvider({ children }: { children: React.React
       registerRain,
       direction,
       setDirection,
-      groot,
-      toggleGroot,
+      verdant,
+      toggleVerdant,
       storm,
       triggerStorm,
       alarmOpen,
@@ -375,8 +383,8 @@ export default function EasterEggsProvider({ children }: { children: React.React
       toast,
       registerRain,
       direction,
-      groot,
-      toggleGroot,
+      verdant,
+      toggleVerdant,
       storm,
       triggerStorm,
       alarmOpen,

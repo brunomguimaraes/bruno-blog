@@ -228,9 +228,9 @@ export function RootPane() {
   const { rootOn, triggerAlarm } = useEasterEggs();
   if (!rootOn) return null;
   return (
-    <PaneShell id="root" title="/knowhere (restricted sector)" num="[#]" className="root-pane">
+    <PaneShell id="root" title="/hollow (restricted sector)" num="[#]" className="root-pane">
       <div className="logline err">
-        · you&apos;ve docked inside a celestial head. every click is on the manifest.
+        · you&apos;ve docked at /hollow. every click is on the manifest.
       </div>
       <div style={{ marginTop: 10 }}>
         <button
@@ -238,7 +238,7 @@ export function RootPane() {
           style={{ borderColor: "var(--danger)", color: "#ffb3c0" }}
           onClick={triggerAlarm}
         >
-          pull the annihilation lever
+          trip the red alert
         </button>
       </div>
     </PaneShell>

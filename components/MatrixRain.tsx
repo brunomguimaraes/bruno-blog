@@ -80,15 +80,13 @@ export default function MatrixRain({ className }: Props) {
       for (let i = 0; i < columns.length; i++) {
         const y = columns[i] * FONT;
         const ch = chars[Math.floor(Math.random() * chars.length)];
-        // Head row → bright, rest → body
-        ctx.fillStyle = y >= 0 && y <= height ? "#1aa3ff" : "#1aa3ff";
-        // highlight head
         const isHead = trail[i] === 0;
         if (isHead) {
           ctx.fillStyle = "#eaf7ff";
           ctx.shadowColor = "#89e6ff";
           ctx.shadowBlur = 10;
         } else {
+          ctx.fillStyle = "#1aa3ff";
           ctx.shadowBlur = 0;
         }
         ctx.fillText(ch, i * FONT, y);

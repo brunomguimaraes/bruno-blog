@@ -31,7 +31,7 @@ export default function CommandBar() {
   return (
     <div className="cmd" ref={barRef} role="toolbar" aria-label="keyboard shortcuts">
       <span className="p">❯</span>
-      <span>bruno@milano:~</span>
+      <span>bruno@bridge:~</span>
       <span className="b">
         <span
           onClick={() => { setPaletteOpen(true); discover("palette"); }}

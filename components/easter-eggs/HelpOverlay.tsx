@@ -16,8 +16,8 @@ export default function HelpOverlay() {
     >
       <div className="panel" role="dialog" aria-modal="true" aria-label="Shortcuts help">
         <header>
-          <span className="t">bruno@milano:~</span>
-          <span>milano manual — hidden features</span>
+          <span className="t">bruno@bridge:~</span>
+          <span>bridge manual — hidden features</span>
           <span className="x" onClick={() => setHelpOpen(false)} role="button" aria-label="close">
             ✕
           </span>

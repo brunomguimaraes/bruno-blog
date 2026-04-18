@@ -58,7 +58,7 @@ export default function StatusBar() {
         aria-label={`warp drive is ${direction}. click to cycle`}
         title="cycle warp drive"
       />
-      <span>bruno@milano</span>
+      <span>bruno@bridge</span>
       <span className="sep">·</span>
       <span>bridge</span>
       <span className="sep">·</span>

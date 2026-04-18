@@ -474,19 +474,19 @@ a.link:hover {
 /* =========================================================
    Easter egg states (body-level modifiers)
    ========================================================= */
-/* Groot mode: the green bleeds through — "I am Groot." */
-body.groot .hero canvas.rain { filter: hue-rotate(140deg) saturate(1.3) brightness(1.05); }
-body.groot .pane.focused {
+/* Verdant mode: the green bleeds through — an anomaly takes hold. */
+body.verdant .hero canvas.rain { filter: hue-rotate(140deg) saturate(1.3) brightness(1.05); }
+body.verdant .pane.focused {
   border-color: #a6ffcb;
   box-shadow: 0 0 26px rgba(166, 255, 203, 0.2);
 }
-body.groot .glitch::before { color: #7affb0; }
-body.groot .glitch::after { color: #c0ffd9; }
-body.groot .hero h1 {
+body.verdant .glitch::before { color: #7affb0; }
+body.verdant .glitch::after { color: #c0ffd9; }
+body.verdant .hero h1 {
   text-shadow: 0 0 18px rgba(122, 255, 176, 0.5), 0 0 4px rgba(192, 255, 217, 0.4);
 }
-body.groot .status { color: #9bd7b1; }
-body.groot .pulse { background: #7affb0; box-shadow: 0 0 8px #7affb0; }
+body.verdant .status { color: #9bd7b1; }
+body.verdant .pulse { background: #7affb0; box-shadow: 0 0 8px #7affb0; }
 
 body.storm .hero h1 { animation: stormFlick 0.08s infinite; }
 @keyframes stormFlick {

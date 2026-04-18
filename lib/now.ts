@@ -9,7 +9,7 @@ export type NowEntry = {
 };
 
 // The pool. Keep these short (one line feel), mix technical + personal,
-// occasional GoG flavor. Add/remove freely — the picker just shuffles.
+// occasional space-outlaw flavor. Add/remove freely — the picker just shuffles.
 const POOL: NowEntry[] = [
   { kind: "ok",   text: "shipping this site & blog." },
   { kind: "ok",   text: "notes on calm on-call rotations." },
@@ -28,14 +28,14 @@ const POOL: NowEntry[] = [
   { kind: "ok",   text: "watching old Strange Loop talks." },
   { kind: "err",  text: "inbox at 47. claims it's fine. it isn't." },
   { kind: "ok",   text: "adding observability to a service I inherited." },
-  { kind: "ok",   text: "cooking lessons from nonna. Rocket's helping. it's chaos." },
+  { kind: "ok",   text: "cooking lessons from nonna. the cat's helping. it's chaos." },
   { kind: "warn", text: "linter added 200 warnings overnight. fun morning." },
   { kind: "ok",   text: "writing better commit messages on purpose." },
   { kind: "ok",   text: "picking up Go again after a long break." },
   { kind: "ok",   text: "rethinking how I estimate — smaller slices, shipped faster." },
   { kind: "warn", text: "deprecation notice on a lib we rely on everywhere." },
   { kind: "ok",   text: "drafting the year-end retrospective post." },
-  { kind: "ok",   text: "Groot is here. he's just standing there. menacingly." },
+  { kind: "ok",   text: "deleting dead code feels like cleaning a kitchen." },
   { kind: "err",  text: "warp rain still not quite right on safari." },
   { kind: "ok",   text: "running again. slow miles, no watch." },
   { kind: "ok",   text: "testing a new blog workflow: mdx + front-matter tags." },
@@ -50,7 +50,7 @@ const POOL: NowEntry[] = [
   { kind: "warn", text: "the dog ate a USB cable. data unharmed." },
   { kind: "ok",   text: "trying not to have opinions on whitespace this quarter." },
   { kind: "ok",   text: "making peace with the scrollbar." },
-  { kind: "ok",   text: "Milano drydock: tuning the warp drive for safari." },
+  { kind: "ok",   text: "bridge drydock: tuning the warp drive for safari." },
   { kind: "ok",   text: "reviewing a PR. one comment per file, max." },
   { kind: "warn", text: "a deploy rolled back itself. the canary did its job." },
   { kind: "ok",   text: "listening to lo-fi. writing a migration script." },

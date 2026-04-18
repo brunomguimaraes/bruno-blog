@@ -6,7 +6,7 @@ import { useEasterEggs } from "./context";
 type Line = { kind: "in" | "out" | "err" | "ok"; text: string };
 
 const WELCOME: Line[] = [
-  { kind: "out", text: "bruno@milano:~$ — type `help` for commands. Welcome aboard." },
+  { kind: "out", text: "bruno@bridge:~$ — type `help` for commands. Welcome aboard." },
 ];
 
 export default function QuakeTerminal() {
@@ -40,17 +40,17 @@ export default function QuakeTerminal() {
 
     switch (head.toLowerCase()) {
       case "help":
-        push("out", "milano commands:");
+        push("out", "bridge commands:");
         push("out", "  help                    this list");
         push("out", "  ls                      list panes");
         push("out", "  cat whoami | now        read a pane");
         push("out", "  warp [forward|paused|reverse]   (alias: rain)");
-        push("out", "  storm | blam            5s of rocket chaos");
-        push("out", "  groot                   i am groot.");
-        push("out", "  alarm                   annihilation wave drill");
+        push("out", "  storm | boom            5s of chaos");
+        push("out", "  verdant                 toggle anomaly mode");
+        push("out", "  alarm                   red alert drill");
         push("out", "  saver                   deep space drift");
-        push("out", "  touch /knowhere         dock at the celestial head");
-        push("out", "  quill                   page star-lord");
+        push("out", "  touch /hollow           dock at the hollow");
+        push("out", "  captain                 listen for an outlaw");
         push("out", "  clear                   clear this terminal");
         push("out", "  exit                    close terminal");
         break;
@@ -85,27 +85,27 @@ export default function QuakeTerminal() {
         break;
       }
       case "storm":
-      case "blam":
+      case "boom":
         egg.triggerStorm();
-        push("ok", "rocket is loose — 5s. Blam! Murdered you!");
+        push("ok", "storm's loose — 5s. Boom. Weapons free.");
         break;
-      case "groot":
-        egg.toggleGroot();
-        egg.discover("groot-word");
-        push("ok", "i am groot.");
+      case "verdant":
+        egg.toggleVerdant();
+        egg.discover("verdant-word");
+        push("ok", "anomaly engaged.");
         break;
-      case "quill":
+      case "captain":
         egg.toast({
-          head: "star-lord",
-          msg: "Peter Quill. Legendary outlaw.",
-          sub: "That's a thing now.",
+          head: "signal received",
+          msg: "a legendary outlaw left you a nod.",
+          sub: "if you know, you know.",
         });
-        egg.discover("quill-word");
-        push("ok", "paging star-lord…");
+        egg.discover("captain-word");
+        push("ok", "listening for outlaws…");
         break;
       case "alarm":
         egg.triggerAlarm();
-        push("err", "ANNIHILATION WAVE · shields up");
+        push("err", "RED ALERT · shields up");
         break;
       case "saver":
         setQuakeOpen(false);
@@ -114,12 +114,12 @@ export default function QuakeTerminal() {
         push("ok", "drifting into deep space…");
         break;
       case "touch":
-        if (arg === "/knowhere" || arg === "knowhere") {
+        if (arg === "/hollow" || arg === "hollow") {
           egg.setRootOn((v) => !v);
-          push("ok", "docking at knowhere. watch your step — it's a head.");
+          push("ok", "docking at the hollow. watch your step.");
         } else if (arg === "/root" || arg === "root") {
           egg.triggerAlarm();
-          push("err", "permission denied — try /knowhere");
+          push("err", "permission denied — try /hollow");
         } else {
           push("ok", `touched ${arg || "(nothing)"}`);
         }
@@ -127,13 +127,13 @@ export default function QuakeTerminal() {
       case "rm":
         if (arg.includes("-rf") && arg.includes("/")) {
           egg.triggerAlarm();
-          push("err", "rm: refusing to blow up the milano");
+          push("err", "rm: refusing to blow up the bridge");
         } else {
           push("out", `rm: ok`);
         }
         break;
       case "sudo":
-        push("err", "bruno is not in the sudoers file. rocket is. this incident will be reported.");
+        push("err", "bruno is not in the sudoers file. the cat is. this incident will be reported.");
         break;
       case "whoami":
         push("out", "bruno");
@@ -157,10 +157,10 @@ export default function QuakeTerminal() {
       className={"quake" + (quakeOpen ? " show" : "")}
       aria-hidden={!quakeOpen}
       role="dialog"
-      aria-label="Milano console"
+      aria-label="Bridge console"
     >
       <header>
-        <span>milano · bruno</span>
+        <span>bridge · bruno</span>
         <span style={{ marginLeft: "auto", opacity: 0.6 }}>
           Ctrl + ` to close · Esc to dismiss
         </span>

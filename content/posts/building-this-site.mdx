@@ -1,11 +1,11 @@
 ---
-title: "Building this site — the Milano bridge"
+title: "Building this site — the bridge"
 date: "2026-04-16"
 tags: ["nextjs", "design"]
-description: "Architecture and design choices, warts and all. With Rocket in the vents."
+description: "Architecture and design choices, warts and all. With a stowaway in the vents."
 ---
 
-Quick tour of how this thing is glued together, in case any of it is useful to you, or in case you're just curious why the homepage has a rocket in it.
+Quick tour of how this thing is glued together, in case any of it is useful to you, or in case you're just curious why the homepage looks like a ship's bridge.
 
 ## Stack
 
@@ -20,12 +20,12 @@ The one real decision was MDX vs a CMS. MDX wins because I would rather write po
 
 ## The hero
 
-The hero pane is a real `<canvas>`, not CSS trickery. It runs at 36fps on purpose. 60 felt frantic, 30 felt juddery, 36 is the sweet spot where your eye stops paying attention to it (if you look closely you can tell, but you have to be looking). The columns reset on random intervals instead of synced frames, which is what keeps it from looking like a cheap screensaver. I kept calling the whole thing "warp drive" while building it and eventually the name stuck.
+The hero pane is a real `<canvas>`, not CSS trickery. It runs at 18fps on purpose. 60 felt frantic, 30 still felt busy, 18 is the sweet spot where your eye stops paying attention to it — a slow drift you only notice if you go looking. The columns reset on random intervals instead of synced frames, which is what keeps it from looking like a cheap screensaver. I kept calling the whole thing "warp drive" while building it and eventually the name stuck.
 
 Two small things hook into it directly:
 
 - the pulse dot in the status bar cycles forward, paused, reversed (I spent an embarrassing amount of time tuning the reversed motion so it didn't look broken),
-- typing `rocket` anywhere on the page runs five seconds of chaos at 2× speed. The toast that pops up says "Blam! Murdered you!", which, if you know, you know.
+- typing `storm` anywhere on the page runs five seconds of chaos at 2× speed. The toast that pops up says "Boom. Weapons free." — there are a few of these nameless nods sprinkled around, mostly for my own amusement.
 
 ## The easter eggs
 

@@ -10,9 +10,9 @@ export default function CyberterrorAlert() {
       <div className="scanbars" />
       <div className="noise" />
       <div className="msg">
-        <div className="code">ERR 0xANN · TRACE: NEGATIVE ZONE</div>
-        <h2>ANNIHILATION WAVE</h2>
-        <div className="det">Hostile signature detected. Milano shields up.</div>
+        <div className="code">ERR 0xBRC · TRACE: OUTER DARK</div>
+        <h2>SIGNATURE DETECTED</h2>
+        <div className="det">Hostile signature inbound. Shields up.</div>
         <div className="bar"><i /></div>
       </div>
     </div>

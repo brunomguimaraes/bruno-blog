@@ -22,8 +22,8 @@ export type Ctx = {
   direction: RainDirection;
   setDirection: Dispatch<SetStateAction<RainDirection>>;
 
-  groot: boolean;
-  toggleGroot: () => void;
+  verdant: boolean;
+  toggleVerdant: () => void;
 
   storm: boolean;
   triggerStorm: () => void;

@@ -13,10 +13,10 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Bruno Guimaraes — fullstack developer",
   description:
-    "Portfolio + blog. Guardians-of-the-Galaxy-flavored terminal UI with a tiled workspace layout. 13 hidden features baked in.",
+    "Portfolio + blog. A terminal-flavored tiled workspace with 13 hidden features baked in.",
   openGraph: {
     title: "Bruno Guimaraes — fullstack developer",
-    description: "Portfolio + blog. Milano bridge, blue warp drive.",
+    description: "Portfolio + blog. Tiled panes, blue warp drive.",
     type: "website",
   },
 };

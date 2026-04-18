@@ -1,6 +1,6 @@
 # bruno-blog
 
-Personal portfolio + blog. Guardians-of-the-Galaxy-comics-flavored terminal UI with a tiled "tmux workspace" layout — the Milano bridge, in blue. Real canvas-based warp rain in the hero pane. **13 hidden features** to discover.
+Personal portfolio + blog. Space-outlaw terminal UI with a tiled "tmux workspace" layout — the bridge, in blue. Real canvas-based warp rain in the hero pane. **13 hidden features** to discover.
 
 ## Stack
 
@@ -40,21 +40,21 @@ app/
     [slug]/page.tsx    MDX post rendering (server component)
 components/
   MatrixRain.tsx       canvas warp-rain scoped to the hero pane
-  HomePage.tsx         the Mix-C tiled hero layout
+  HomePage.tsx         the tiled hero layout
   StatusBar.tsx        top bar with clock + warp state + egg counter
   CommandBar.tsx       bottom bar with shortcut hints
   GlobalShell.tsx      client boundary that mounts the EasterEggsProvider
   GlitchText.tsx       data-text clone trick for cyan chromatic fringe
-  Panes.tsx            whoami / now / blog-list / contact / knowhere pane
+  Panes.tsx            whoami / now / blog-list / contact / hollow pane
   easter-eggs/
     context.ts         createContext + useEasterEggs hook
     provider.tsx       state, keydown dispatcher, command runner
     config.ts          EGGS + palette COMMANDS
-    HelpOverlay.tsx    ? -toggle Milano manual overlay
+    HelpOverlay.tsx    ? -toggle bridge manual overlay
     CommandPalette.tsx Cmd/Ctrl+K ship's controls palette
-    QuakeTerminal.tsx  drop-down Milano console (with real commands)
+    QuakeTerminal.tsx  drop-down bridge console (with real commands)
     Screensaver.tsx    idle-60s deep space drift
-    CyberterrorAlert.tsx  Annihilation Wave red alert
+    CyberterrorAlert.tsx  Breach Wave red alert
     ToastHost.tsx      discovery + confirmation toasts
     hooks.ts           useKonami, useTypedWords, useIdle, useVimEscape
 lib/
@@ -65,22 +65,22 @@ content/
 
 ## Hidden features (spoilers — collect them all from the site instead)
 
-Press `?` in the running app to see the live Milano manual — it obscures undiscovered entries.
+Press `?` in the running app to see the live bridge manual — it obscures undiscovered entries.
 
 | Trigger | Feature |
 | --- | --- |
-| `?` | Milano manual (lists what you've found) |
+| `?` | Bridge manual (lists what you've found) |
 | `⌘K` / `Ctrl+K` | Ship's controls — run any feature by name |
-| `` Ctrl+` `` or `` ` `` | Milano console (drop-down, with real commands) |
+| `` Ctrl+` `` or `` ` `` | Bridge console (drop-down, with real commands) |
 | `Tab` then `Enter` | Cycle pane focus, then bridge-zoom it |
 | click pulse dot | Warp drive: forward → paused → reverse |
-| click the hero title | Rocket storm — 2× speed for 5s |
-| Konami code `↑↑↓↓←→←→BA` | I AM GROOT (green bleeds through the blue) |
-| type `rocket` | "Blam! Murdered you!" — 5s storm |
-| type `groot` | I am Groot. |
-| type `quill` | Star-Lord checks in |
-| console → `touch /knowhere` | Dock at the celestial head |
-| console → `alarm` or `rm -rf /` | Annihilation Wave — shields up |
+| click the hero title | Storm — 2× speed for 5s |
+| Konami code `↑↑↓↓←→←→BA` | Anomaly mode (green bleeds through the blue) |
+| type `storm` | "Boom. Weapons free." — 5s storm |
+| type `verdant` | Toggles the anomaly |
+| type `captain` | A legendary outlaw checks in |
+| console → `touch /hollow` | Dock at the hollowed husk |
+| console → `alarm` or `rm -rf /` | Breach Wave — shields up |
 | `:q` / `:wq` | Cheeky vim quit toast |
 | idle for 60 seconds | Deep space drift — screensaver takeover |
 
@@ -94,4 +94,4 @@ The easiest path is Vercel:
 
 ## Credits
 
-Designed + coded by Bruno Guimaraes. Warp rain inspired by the original Matrix effect, blued out and rethemed as the Milano bridge. Rocket, Groot, Star-Lord, Knowhere, and the Annihilation Wave are Marvel characters/concepts — referenced in loving homage to the GoG comics run.
+Designed + coded by Bruno Guimaraes. Warp rain inspired by the original Matrix effect, blued out and rethemed as a ship's bridge. The whole thing is a loving homage to classic space-outlaw comics — any resemblance to specific characters, places, or events is deliberately kept at the "if you know, you know" level.
