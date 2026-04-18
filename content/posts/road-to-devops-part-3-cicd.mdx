@@ -1,0 +1,85 @@
+---
+title: "My road to learn DevOps, part 3: mastering CI/CD pipelines"
+date: "2024-03-12"
+tags: ["devops", "cicd", "automation", "series-devops"]
+description: "GitHub Actions and GitFlow, wired end-to-end."
+---
+
+Welcome back. Earlier parts of this series covered [Linux and the shell](/blog/road-to-devops-part-1-linux-shell) and then [advanced shell scripting](/blog/road-to-devops-part-2-advanced-shell). In this installment we zoom in on two pillars of modern infra: **Continuous Integration / Continuous Deployment** (CI/CD) and a preview of **Infrastructure as Code** (IaC). Getting these right doesn't just streamline your workflow — it makes your whole system more scalable, reliable, and predictable.
+
+## Continuous integration and continuous deployment
+
+CI/CD sits at the core of DevOps. It's the operational embodiment of "automate the boring parts and never let them rot". Let's walk through setting up a real pipeline.
+
+### Pick a CI/CD tool
+
+Jenkins, GitLab CI, CircleCI, GitHub Actions — all solid. For this post we'll use **GitHub Actions** because it lives next to the code.
+
+### CI/CD with GitHub Actions and GitFlow
+
+GitHub Actions + GitFlow is a clean combination for managing features, releases, and hotfixes through the lifecycle. GitFlow is a branching model designed around project releases, with two long-lived branches:
+
+- **`main`** — official release history
+- **`develop`** — integration branch for features
+
+And three supporting branch types:
+
+- **Feature branches** — branch off `develop`, merge back on completion
+- **Release branches** — branch off `develop`, merge into `main` and back into `develop` when the release ships
+- **Hotfix branches** — branch off `main`, merge back into both `main` and `develop`
+
+### Example workflow
+
+Create `.github/workflows/ci-cd-pipeline.yml`. This pipeline builds and tests code from feature branches and deploys releases from `main`:
+
+```yaml
+name: CI/CD Pipeline with GitFlow
+
+on:
+  push:
+    branches:
+      - 'features/**'
+      - 'main'
+  pull_request:
+    branches:
+      - 'develop'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: echo "Add build commands here"
+      - name: Test
+        run: echo "Add test commands here"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: echo "Add deployment commands here"
+        env:
+          DEPLOY_ENV: production
+```
+
+Triggers: pushes to `features/**` and `main`, plus pull requests targeting `develop`. Jobs: build and test, then a conditional deploy that only fires for `main`.
+
+### Best practices
+
+- **Automate testing** — every push or pull request should trigger tests. The sooner you catch a bug, the cheaper it is.
+- **Branch protections** — block direct pushes to `main` and `develop`. Require pull requests and reviews.
+- **Environment secrets** — use repository/environment secrets for credentials, never commit them.
+
+## What's next: Terraform and IaC
+
+CI/CD gets your code to production. But infrastructure still lives somewhere, and you want to manage it with the same discipline as your code. That's what **Terraform** solves — treat infrastructure as versioned, reviewable configuration files. Provision, update, and tear down predictably.
+
+Stay tuned. The next step in this journey bridges software and infrastructure so you get a seamless pipeline all the way from commit to production.
+
+---
+
+*Originally published on [dev.to](https://dev.to/brunomguimaraes/my-road-to-learn-devops-part-3-mastering-cicd-pipelines-10m1) — March 2024. Part 3 of a series.*

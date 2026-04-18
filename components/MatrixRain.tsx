@@ -12,13 +12,17 @@ export default function MatrixRain({ className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const cvs = canvasRef.current;
-    if (!cvs) return;
-    const ctx = cvs.getContext("2d");
-    if (!ctx) return;
+    const cvsMaybe = canvasRef.current;
+    if (!cvsMaybe) return;
+    const ctxMaybe = cvsMaybe.getContext("2d");
+    if (!ctxMaybe) return;
+    const cvs: HTMLCanvasElement = cvsMaybe;
+    const ctx: CanvasRenderingContext2D = ctxMaybe;
 
     const FONT = 16;
-    const BASE_INTERVAL = 1000 / 36; // 36fps
+    // 18fps baseline — a calm, "slow drift" warp rate.
+    // Storm mode still kicks it up via `speedMul`/`stormTemp`.
+    const BASE_INTERVAL = 1000 / 18;
     let direction: "forward" | "paused" | "reverse" = "forward";
     let speedMul = 1;
     let stormUntil = 0;

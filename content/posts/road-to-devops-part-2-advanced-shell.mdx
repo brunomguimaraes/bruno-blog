@@ -1,0 +1,202 @@
+---
+title: "My road to learn DevOps, part 2: advanced shell scripting and beyond"
+date: "2023-06-20"
+tags: ["devops", "shell", "series-devops"]
+description: "Functions, arrays, error handling, cron — moving past the basics."
+---
+
+In [part 1](/blog/road-to-devops-part-1-linux-shell) we dipped our toes into DevOps by covering Linux commands and basic shell scripting. Time to go deeper. This post covers the advanced shell concepts and the practical automations that show up in real infra work.
+
+## Advanced shell scripting
+
+Shell scripting is how you automate everything that would otherwise eat your day. A quick tour of the pieces that move you past "hello world".
+
+### Functions
+
+Reusable blocks of code. Cleaner scripts, less repetition:
+
+```bash
+#!/bin/bash
+greet() {
+    echo "Hello, $1"
+}
+greet "John Doe"
+```
+
+### Command-line arguments
+
+Scripts can read input directly from the CLI, which makes them flexible:
+
+```bash
+#!/bin/bash
+echo "Hello, $1"
+```
+
+Run it with `./script.sh "John Doe"` and it prints `Hello, John Doe`.
+
+### Arrays
+
+Arrays store multiple values in a single variable — handy with larger datasets:
+
+```bash
+#!/bin/bash
+fruits=("Apple" "Banana" "Cherry")
+for fruit in "${fruits[@]}"
+do
+    echo "I like $fruit"
+done
+```
+
+### Error handling
+
+Make your scripts fail loudly and early:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+invalid_command
+echo "This won't print"
+```
+
+`set -euo pipefail` tells the shell: exit on errors, treat unset variables as errors, and propagate failures in pipelines. Best-in-class default for any non-trivial script.
+
+### Regular expressions
+
+Regex is how you pattern-match inside the shell:
+
+```bash
+#!/bin/bash
+text="The year is 2023"
+echo "$text" | grep -oE '[0-9]+'
+```
+
+Outputs `2023`. `-o` prints only the match, `-E` enables extended regex.
+
+## Practical applications
+
+Knowing the syntax is a start. Applying it is where the value shows up.
+
+### Automating system maintenance
+
+Walking through a log and extracting errors:
+
+```bash
+#!/bin/bash
+LOG_FILE="/var/log/syslog"
+ERROR_PATTERN="error"
+grep -i $ERROR_PATTERN $LOG_FILE > errors.txt
+```
+
+Schedule this with cron and you've got a daily issue digest.
+
+### Resource monitoring
+
+Snapshot CPU and memory so you can spot regressions:
+
+```bash
+#!/bin/bash
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
+MEMORY_USAGE=$(free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }')
+echo "At $DATE, CPU usage is $CPU_USAGE, Memory usage is $MEMORY_USAGE" >> resource_usage.log
+```
+
+Append a record every time it runs. Cron handles the cadence.
+
+### Backup management
+
+Automated backups of a directory:
+
+```bash
+#!/bin/bash
+BACKUP_SRC="/path/to/your/directory"
+BACKUP_DEST="/path/to/your/backup/location"
+DATE=$(date +%Y%m%d)
+tar -czf $BACKUP_DEST/backup_$DATE.tar.gz -C $BACKUP_SRC .
+```
+
+A compressed tarball lands in your backup location with the date baked into the filename.
+
+### Server health check
+
+Ping a server; alert if it's down:
+
+```bash
+#!/bin/bash
+SERVER="your.server.com"
+ping -c 1 $SERVER
+if [ "$?" -ne 0 ]; then
+    echo "$SERVER not reachable"
+else
+    echo "$SERVER is up"
+fi
+```
+
+### Disk space monitoring
+
+Walk every partition and email if any are over 90%:
+
+```bash
+#!/bin/bash
+MAX_USAGE=90
+EMAIL="admin@example.com"
+for partition in $(df -h | grep "^/" | awk '{print $1}')
+do
+    USAGE=$(df -h | grep $partition | awk '{ print $5}' | sed 's/%//g')
+    if [ $USAGE -gt $MAX_USAGE ]; then
+        echo "Running out of disk space in $partition" | mail -s "Disk Space Alert" $EMAIL
+    fi
+done
+```
+
+## Scheduling jobs with cron
+
+You've written the scripts — now make them run on their own. Cron is the time-based scheduler in Unix-like systems; it takes a commands-and-a-schedule file and quietly does its thing in the background.
+
+Edit your crontab with:
+
+```bash
+crontab -e
+```
+
+The schedule has five fields:
+
+```text
+*     *     *   *    *        command to be executed
+|     |     |   |    |
+|     |     |   |    +----- day of the week (0 - 6) (Sunday=0)
+|     |     |   +--------- month (1 - 12)
+|     |     +------------- day of the month (1 - 31)
+|     +------------------- hour (0 - 23)
++------------------------- minute (0 - 59)
+```
+
+An asterisk means "every value for that field". A few practical examples:
+
+Backup at midnight every day:
+
+```text
+0 0 * * * /path/to/your/backup_script.sh
+```
+
+Health check every hour on the hour:
+
+```text
+0 * * * * /path/to/your/health_check_script.sh
+```
+
+Disk check twice a day — midnight and noon:
+
+```text
+0 0,12 * * * /path/to/your/disk_space_check_script.sh
+```
+
+Make sure your scripts are executable and that you're giving cron absolute paths — it doesn't inherit your login shell's environment.
+
+## The journey continues
+
+Deepening DevOps knowledge is continuous. The tools and languages matter, but the real learning comes from applying them to real systems. More to come.
+
+---
+
+*Originally published on [dev.to](https://dev.to/brunomguimaraes/my-road-to-learn-devops-part-2-to-advanced-shell-scripting-and-beyond-3p) — June 2023. Part 2 of a series.*

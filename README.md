@@ -1,6 +1,6 @@
 # bruno-blog
 
-Personal portfolio + blog. Matrix-but-blue aesthetic with a tiled "tmux workspace" layout. Real canvas-based rain in the hero pane. **13 hidden features** to discover.
+Personal portfolio + blog. Guardians-of-the-Galaxy-comics-flavored terminal UI with a tiled "tmux workspace" layout — the Milano bridge, in blue. Real canvas-based warp rain in the hero pane. **13 hidden features** to discover.
 
 ## Stack
 
@@ -39,22 +39,22 @@ app/
     page.tsx           blog index
     [slug]/page.tsx    MDX post rendering (server component)
 components/
-  MatrixRain.tsx       canvas rain scoped to the hero pane
+  MatrixRain.tsx       canvas warp-rain scoped to the hero pane
   HomePage.tsx         the Mix-C tiled hero layout
-  StatusBar.tsx        top bar with clock + rain state + egg counter
+  StatusBar.tsx        top bar with clock + warp state + egg counter
   CommandBar.tsx       bottom bar with shortcut hints
   GlobalShell.tsx      client boundary that mounts the EasterEggsProvider
   GlitchText.tsx       data-text clone trick for cyan chromatic fringe
-  Panes.tsx            whoami / now / blog-list / contact / root pane
+  Panes.tsx            whoami / now / blog-list / contact / knowhere pane
   easter-eggs/
     context.ts         createContext + useEasterEggs hook
     provider.tsx       state, keydown dispatcher, command runner
     config.ts          EGGS + palette COMMANDS
-    HelpOverlay.tsx    ? -toggle overlay listing discovered eggs
-    CommandPalette.tsx Cmd/Ctrl+K fuzzy palette
-    QuakeTerminal.tsx  drop-down shell with real commands
-    Screensaver.tsx    idle-60s fullscreen rain takeover
-    CyberterrorAlert.tsx  red ACCESS DENIED flash
+    HelpOverlay.tsx    ? -toggle Milano manual overlay
+    CommandPalette.tsx Cmd/Ctrl+K ship's controls palette
+    QuakeTerminal.tsx  drop-down Milano console (with real commands)
+    Screensaver.tsx    idle-60s deep space drift
+    CyberterrorAlert.tsx  Annihilation Wave red alert
     ToastHost.tsx      discovery + confirmation toasts
     hooks.ts           useKonami, useTypedWords, useIdle, useVimEscape
 lib/
@@ -65,24 +65,24 @@ content/
 
 ## Hidden features (spoilers — collect them all from the site instead)
 
-Press `?` in the running app to see a live list of what you've found. The site intentionally obscures undiscovered entries.
+Press `?` in the running app to see the live Milano manual — it obscures undiscovered entries.
 
 | Trigger | Feature |
 | --- | --- |
-| `?` | Help overlay (lists what you've found) |
-| `⌘K` / `Ctrl+K` | Command palette — run any feature by name |
-| `` Ctrl+` `` or `` ` `` | Quake drop-down terminal (with real commands) |
-| `Tab` then `Enter` | Cycle pane focus, then tmux-zoom it |
-| click pulse dot | Rain: forward → paused → reverse |
-| click the hero title | Storm — 2× speed for 5s |
-| Konami code `↑↑↓↓←→←→BA` | Anomaly mode (OG matrix green bleeds through) |
-| type `matrix` | Rain storm (anywhere on the page) |
-| type `rabbit` | "follow the white rabbit…" |
-| type `wake` | "Wake up, Neo…" |
-| quake → `touch /root` | Cyberterror red alert — ACCESS DENIED |
-| quake → `rm -rf /` | Also trips the alarm |
+| `?` | Milano manual (lists what you've found) |
+| `⌘K` / `Ctrl+K` | Ship's controls — run any feature by name |
+| `` Ctrl+` `` or `` ` `` | Milano console (drop-down, with real commands) |
+| `Tab` then `Enter` | Cycle pane focus, then bridge-zoom it |
+| click pulse dot | Warp drive: forward → paused → reverse |
+| click the hero title | Rocket storm — 2× speed for 5s |
+| Konami code `↑↑↓↓←→←→BA` | I AM GROOT (green bleeds through the blue) |
+| type `rocket` | "Blam! Murdered you!" — 5s storm |
+| type `groot` | I am Groot. |
+| type `quill` | Star-Lord checks in |
+| console → `touch /knowhere` | Dock at the celestial head |
+| console → `alarm` or `rm -rf /` | Annihilation Wave — shields up |
 | `:q` / `:wq` | Cheeky vim quit toast |
-| idle for 60 seconds | Screensaver — pure rain takeover |
+| idle for 60 seconds | Deep space drift — screensaver takeover |
 
 ## Deploy
 
@@ -94,4 +94,4 @@ The easiest path is Vercel:
 
 ## Credits
 
-Designed + coded by Bruno Guimaraes. Rain inspired by the original Matrix effect, in blue.
+Designed + coded by Bruno Guimaraes. Warp rain inspired by the original Matrix effect, blued out and rethemed as the Milano bridge. Rocket, Groot, Star-Lord, Knowhere, and the Annihilation Wave are Marvel characters/concepts — referenced in loving homage to the GoG comics run.

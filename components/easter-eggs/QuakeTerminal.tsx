@@ -6,7 +6,7 @@ import { useEasterEggs } from "./context";
 type Line = { kind: "in" | "out" | "err" | "ok"; text: string };
 
 const WELCOME: Line[] = [
-  { kind: "out", text: "bruno@matrix:~$ — type `help` for commands, `clear` to clear." },
+  { kind: "out", text: "bruno@milano:~$ — type `help` for commands. Welcome aboard." },
 ];
 
 export default function QuakeTerminal() {
@@ -40,16 +40,17 @@ export default function QuakeTerminal() {
 
     switch (head.toLowerCase()) {
       case "help":
-        push("out", "commands:");
+        push("out", "milano commands:");
         push("out", "  help                    this list");
         push("out", "  ls                      list panes");
         push("out", "  cat whoami | now        read a pane");
-        push("out", "  rain [forward|paused|reverse]");
-        push("out", "  storm                   5s matrix storm");
-        push("out", "  anomaly                 toggle anomaly mode");
-        push("out", "  alarm                   simulate red alert");
-        push("out", "  saver                   start screensaver");
-        push("out", "  touch /root             …don't.");
+        push("out", "  warp [forward|paused|reverse]   (alias: rain)");
+        push("out", "  storm | blam            5s of rocket chaos");
+        push("out", "  groot                   i am groot.");
+        push("out", "  alarm                   annihilation wave drill");
+        push("out", "  saver                   deep space drift");
+        push("out", "  touch /knowhere         dock at the celestial head");
+        push("out", "  quill                   page star-lord");
         push("out", "  clear                   clear this terminal");
         push("out", "  exit                    close terminal");
         break;
@@ -71,39 +72,54 @@ export default function QuakeTerminal() {
         }
         break;
       }
+      case "warp":
       case "rain": {
         const dir = (arg || "forward") as "forward" | "paused" | "reverse";
         if (!["forward", "paused", "reverse"].includes(dir)) {
-          push("err", `rain: unknown direction "${arg}"`);
+          push("err", `warp: unknown direction "${arg}"`);
         } else {
           egg.setDirection(dir);
           egg.discover("rain-click");
-          push("ok", `rain → ${dir}`);
+          push("ok", `warp drive → ${dir}`);
         }
         break;
       }
       case "storm":
+      case "blam":
         egg.triggerStorm();
-        push("ok", "storm incoming — 5s");
+        push("ok", "rocket is loose — 5s. Blam! Murdered you!");
         break;
-      case "anomaly":
-        egg.toggleAnomaly();
-        push("ok", "anomaly toggled");
+      case "groot":
+        egg.toggleGroot();
+        egg.discover("groot-word");
+        push("ok", "i am groot.");
+        break;
+      case "quill":
+        egg.toast({
+          head: "star-lord",
+          msg: "Peter Quill. Legendary outlaw.",
+          sub: "That's a thing now.",
+        });
+        egg.discover("quill-word");
+        push("ok", "paging star-lord…");
         break;
       case "alarm":
         egg.triggerAlarm();
-        push("err", "ALERT: intrusion simulated");
+        push("err", "ANNIHILATION WAVE · shields up");
         break;
       case "saver":
         setQuakeOpen(false);
         egg.setSaverOn(true);
         egg.discover("saver");
-        push("ok", "entering screensaver…");
+        push("ok", "drifting into deep space…");
         break;
       case "touch":
-        if (arg === "/root" || arg === "root") {
+        if (arg === "/knowhere" || arg === "knowhere") {
+          egg.setRootOn((v) => !v);
+          push("ok", "docking at knowhere. watch your step — it's a head.");
+        } else if (arg === "/root" || arg === "root") {
           egg.triggerAlarm();
-          push("err", "permission denied");
+          push("err", "permission denied — try /knowhere");
         } else {
           push("ok", `touched ${arg || "(nothing)"}`);
         }
@@ -111,13 +127,13 @@ export default function QuakeTerminal() {
       case "rm":
         if (arg.includes("-rf") && arg.includes("/")) {
           egg.triggerAlarm();
-          push("err", "rm: refusing to destroy everything");
+          push("err", "rm: refusing to blow up the milano");
         } else {
           push("out", `rm: ok`);
         }
         break;
       case "sudo":
-        push("err", "bruno is not in the sudoers file. this incident will be reported.");
+        push("err", "bruno is not in the sudoers file. rocket is. this incident will be reported.");
         break;
       case "whoami":
         push("out", "bruno");
@@ -141,10 +157,10 @@ export default function QuakeTerminal() {
       className={"quake" + (quakeOpen ? " show" : "")}
       aria-hidden={!quakeOpen}
       role="dialog"
-      aria-label="Quake terminal"
+      aria-label="Milano console"
     >
       <header>
-        <span>quake · bruno@matrix</span>
+        <span>milano · bruno</span>
         <span style={{ marginLeft: "auto", opacity: 0.6 }}>
           Ctrl + ` to close · Esc to dismiss
         </span>

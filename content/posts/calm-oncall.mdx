@@ -5,28 +5,34 @@ tags: ["oncall", "ops"]
 description: "Small rituals, big return."
 ---
 
-On-call isn't supposed to ruin your weekend. After a few rotations where it did, I collected the handful of habits that actually moved the needle.
+A couple of years ago I had a rotation where I got paged every Saturday morning for the same alert. By the time I'd finished typing my password, the service had always recovered on its own. I was furious and very tired, which is a bad combination for making good decisions about anything, including on-call.
+
+Three things I changed after that. None of them are clever. All of them stuck.
 
 ## 1. Write the runbook before the fire
 
-Every alert I own has a runbook with three sections: **what fired**, **what to check first**, **how to resolve**. Ten minutes of writing today saves thirty minutes of 3am tab-switching later. The runbook lives one link away from the alert.
+Every alert I own has a runbook with three sections: what fired, first thing to check, how to fix it. I don't try to make it comprehensive. If I can get a sleepy version of myself to the right dashboard in two clicks, I've won.
+
+The real trick isn't the runbook, it's the link. The runbook has to be attached to the alert itself. Not "in Confluence somewhere", not "ask Dave", not "it's pinned in #ops-alerts". On the page. PagerDuty has a field for it. Use it.
 
 ## 2. Kill flappy alerts the morning after
 
-Any alert that paged me and resolved itself without my action gets ruthlessly re-evaluated the next morning. Either the threshold is wrong, the window is too short, or the thing is genuinely noisy and needs a different signal. I don't let "it's mostly fine" alerts live in my rotation.
+Anything that pages me and then resolves before I've done something goes on a list. The next morning I either raise the threshold, widen the window, or delete the thing and replace it with an alert on the real symptom. I used to leave them. "It's mostly fine." They're never mostly fine; they just train you to ignore pages, which is the worst outcome.
 
-## 3. Post-incident review, even for the small ones
+The test I use: would I be upset if this alert was silent for a week? If the answer is no, it shouldn't be paging me at all.
 
-Not the theater version. The five-line version:
+## 3. Tiny postmortems, even for nothing
 
-- What happened?
-- Why didn't we catch it earlier?
-- What's the smallest change that would've prevented it?
-- Who's doing it by when?
-- Anything to add to the runbook?
+Not the full theatrical version with a doc template and a Zoom call and action items nobody does. Five bullets in a Slack thread:
 
-That's it. No blame, no multi-page doc. Just a crisp thread the team can skim.
+- what happened
+- why we didn't catch it sooner
+- smallest change that would've prevented it
+- who's doing it, by when
+- anything worth adding to the runbook
+
+That's the whole thing. Sometimes it's four bullets and a shrug. It still works, because the alternative is forgetting by Thursday and tripping over the same problem six weeks later.
 
 ---
 
-None of this is clever. It just compounds. Six months of doing these three things turned on-call from "brace for impact" into "probably nothing, but I'm ready."
+Six months of doing these three things, Saturday mornings got boring again, which is exactly what I wanted. On-call didn't quiet down on its own. I made it quieter, one small cleanup at a time.

@@ -1,0 +1,146 @@
+---
+title: "Seamless migration: integrating legacy components into Next.js with Module Federation"
+date: "2025-07-31"
+tags: ["nextjs", "webdev", "module-federation"]
+description: "Ship the new app without rewriting the old one."
+---
+
+As modern teams migrate legacy applications to Next.js, a common challenge arises: **how do we reuse components from the old app without rewriting them all at once?**
+
+Enter **Module Federation** — a Webpack 5 feature that lets you load remote components from other applications dynamically. This technique, often called **micro frontends**, enables incremental migration, shared components, and reduced duplication.
+
+In this guide we walk through:
+
+- Why Module Federation is effective for migrations
+- A practical example: Next.js (new app) + legacy React (old app)
+- Step-by-step setup
+- Best practices for maintainability
+
+## Why use Module Federation during a migration?
+
+Imagine migrating from a legacy React app (e.g. Create React App) to Next.js. Rewriting every UI component is expensive, risky, and often unnecessary.
+
+Module Federation lets you:
+
+- Reuse legacy UI components in the new app
+- Avoid duplicating shared logic or design systems
+- Split teams across legacy and modern stacks
+- Migrate pages or features incrementally
+
+Unlike iframes or SSR proxies, this approach delivers live React components with full interactivity.
+
+## Architecture overview
+
+```
++---------------------------+     +------------------------------+
+|      Legacy React App     | --> | remoteEntry.js (exposes UI)  |
++---------------------------+     +------------------------------+
+                                             |
+                                       consumed by
+                                             v
++---------------------------+     +------------------------------+
+|        Next.js App        | <-- |  LegacyBanner (remote UI)    |
++---------------------------+     +------------------------------+
+```
+
+## Step-by-step: setting up Module Federation
+
+### Prerequisites
+
+- Both apps use **Webpack 5**
+- Legacy app exposes components
+- Next.js app consumes components
+
+### 1. Legacy app (remote)
+
+In `webpack.config.js`:
+
+```js
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = {
+  output: {
+    publicPath: 'http://localhost:3002/',
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'legacyApp',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './LegacyBanner': './src/components/LegacyBanner',
+      },
+      shared: {
+        react: { singleton: true, eager: true },
+        'react-dom': { singleton: true, eager: true },
+      },
+    }),
+  ],
+};
+```
+
+Ensure `remoteEntry.js` is publicly accessible.
+
+### 2. Next.js app (host)
+
+Install the helper package:
+
+```bash
+npm install @module-federation/nextjs-mf --save-dev
+```
+
+In `next.config.js`:
+
+```js
+const { withFederatedSidecar } = require('@module-federation/nextjs-mf');
+
+module.exports = withFederatedSidecar({
+  name: 'nextApp',
+  remotes: {
+    legacyApp: 'legacyApp@http://localhost:3002/remoteEntry.js',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+### 3. Use the remote component in Next.js
+
+```tsx
+// components/LegacyBanner.tsx
+import dynamic from 'next/dynamic';
+
+const LegacyBanner = dynamic(() => import('legacyApp/LegacyBanner'), {
+  ssr: false,
+});
+
+export default function Page() {
+  return (
+    <div>
+      <h1>Modern Page</h1>
+      <LegacyBanner />
+    </div>
+  );
+}
+```
+
+## Gotchas and best practices
+
+| Tip | Why it matters |
+| --- | --- |
+| Use `singleton` for `react` and `react-dom` | Prevents hook mismatch errors |
+| Load remotes dynamically with `ssr: false` | SSR support is experimental |
+| Wrap remotes in error boundaries | Network failures can break the page |
+| Expose only what you need | Smaller bundles, less leakage |
+| Add CORS headers on the legacy server | Required for cross-origin loading |
+
+## Final thoughts
+
+Module Federation is one of the most powerful tools for modernizing frontends without a complete rewrite. It gives you better DX, lower risk, and shared code across apps.
+
+If you're deciding between rewriting everything or never touching the legacy app, Module Federation offers a practical middle path.
+
+---
+
+*Originally published on [dev.to](https://dev.to/brunomguimaraes/seamless-migration-integrating-legacy-components-into-nextjs-with-module-federation-jfe) — July 2025.*

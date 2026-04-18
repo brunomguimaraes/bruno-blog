@@ -2,7 +2,7 @@
   "name": "bruno-blog",
   "version": "0.1.0",
   "private": true,
-  "description": "Bruno Guimaraes — personal portfolio + blog. Matrix-but-blue. 13 hidden features.",
+  "description": "Bruno Guimaraes — personal portfolio + blog. Milano bridge, blue warp drive. 13 hidden features.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

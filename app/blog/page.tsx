@@ -19,20 +19,40 @@ export default async function BlogIndex() {
       </p>
 
       <ul className="space-y-4">
-        {posts.map((p) => (
-          <li key={p.slug}>
-            <Link
-              href={`/blog/${p.slug}`}
-              className="block rounded-md border border-transparent p-3 transition hover:border-accent/30 hover:bg-accent/5"
-            >
-              <div className="text-[11px] uppercase tracking-[0.14em] text-accent opacity-70">
-                [{p.date}] {p.tags.map((t) => `#${t}`).join(" ")}
-              </div>
-              <div className="mt-1 text-lg text-white">{p.title}</div>
-              <div className="mt-1 text-sm text-accent-soft/75">{p.description}</div>
-            </Link>
-          </li>
-        ))}
+        {posts.map((p) => {
+          const seriesTag = p.tags.find((t) => t.startsWith("series-"));
+          const isArchive = p.tags.includes("archive");
+          const visibleTags = p.tags.filter(
+            (t) => !t.startsWith("series-") && t !== "archive",
+          );
+          return (
+            <li key={p.slug}>
+              <Link
+                href={`/blog/${p.slug}`}
+                className="block rounded-md border border-transparent p-3 transition hover:border-accent/30 hover:bg-accent/5"
+              >
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.14em] text-accent opacity-70">
+                  <span>[{p.date}]</span>
+                  {visibleTags.length > 0 && (
+                    <span>{visibleTags.map((t) => `#${t}`).join(" ")}</span>
+                  )}
+                  {seriesTag && (
+                    <span className="rounded-sm border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] tracking-[0.18em] text-accent opacity-100">
+                      series · {seriesTag.replace(/^series-/, "")}
+                    </span>
+                  )}
+                  {isArchive && (
+                    <span className="rounded-sm border border-accent-dim/40 bg-white/5 px-1.5 py-0.5 text-[10px] tracking-[0.18em] text-accent-dim opacity-100">
+                      archive
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 text-lg text-white">{p.title}</div>
+                <div className="mt-1 text-sm text-accent-soft/75">{p.description}</div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </main>
   );

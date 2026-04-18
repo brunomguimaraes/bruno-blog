@@ -1,0 +1,122 @@
+---
+title: "My road to learn DevOps, part 1: Linux and the shell"
+date: "2023-06-12"
+tags: ["devops", "linux", "shell", "series-devops"]
+description: "Starting where every DevOps story starts — the terminal."
+---
+
+As someone who's new to DevOps, I'm diving deep into Linux commands and shell scripting — they're clearly the first rung of the ladder. This is the opening note in a series where I walk through what I'm learning, roughly in the order I learned it.
+
+Mastering Linux and the shell is non-negotiable for this kind of work. These are the skills that let you automate tasks, manage systems, and solve problems without flailing. This guide is an overview, not a manual — go deeper with the docs and tutorials where it matters.
+
+---
+
+## Linux commands
+
+Linux commands are how you talk to the system. A handful of fundamentals every aspiring DevOps person should have in their fingers:
+
+- **`ls`** — list files and directories in the current directory. E.g. `ls`
+- **`cd`** — change directory. E.g. `cd /home/user/Documents`
+- **`pwd`** — print the current working directory. E.g. `pwd`
+- **`cat`** — display the contents of a file. E.g. `cat example.txt`
+- **`touch`** — create an empty file. E.g. `touch newfile.txt`
+- **`rm`** — remove files or directories. E.g. `rm example.txt`
+- **`cp`** — copy files or directories. E.g. `cp source.txt destination.txt`
+- **`mv`** — move or rename. E.g. `mv oldname.txt newname.txt`
+- **`find`** — search for files by criteria. E.g. `find / -name example.txt`
+- **`grep`** — search for text patterns in files. E.g. `grep "example" file.txt`
+
+These are the basics. Real DevOps work needs a lot more around system management, processes, networking, and so on.
+
+---
+
+## Shell scripting
+
+A shell script is a series of commands the shell executes on your behalf. You can combine long or repetitive command sequences into a single script, saved and rerun whenever you need — which is the whole point.
+
+### The basics
+
+A shell script starts with a "shebang" (`#!`) followed by the path to the interpreter. Usually that's `/bin/bash`. Minimal example:
+
+```bash
+#!/bin/bash
+echo "Hello, World!"
+```
+
+`echo` prints its arguments, so this script outputs `Hello, World!`.
+
+Run a script by giving it execute permission and then invoking it:
+
+```bash
+chmod +x script.sh
+./script.sh
+```
+
+The first command grants execution; the second runs the script.
+
+### Variables
+
+Variables store values you can reference later:
+
+```bash
+#!/bin/bash
+name="John Doe"
+echo "Hello, $name"
+```
+
+Outputs `Hello, John Doe`.
+
+### Conditional statements
+
+Scripts branch on conditions:
+
+```bash
+#!/bin/bash
+read -p "Enter your name: " name
+if [ "$name" == "John Doe" ]; then
+    echo "Hello, John Doe."
+else
+    echo "You are not John Doe!"
+fi
+```
+
+`read` captures input, the `if` compares, and each branch does its thing.
+
+### Loops
+
+Loops are how you do repetitive work:
+
+```bash
+#!/bin/bash
+for ((i=1; i<=5; i++)); do
+    echo "Iteration: $i"
+done
+```
+
+Prints `Iteration: 1` through `Iteration: 5`.
+
+### Shell scripting in DevOps
+
+In DevOps, shell scripting is the connective tissue — system maintenance, network monitoring, batch updates, backups, all automated. Here's a script that warns the admin when disk usage goes over 90%:
+
+```bash
+#!/bin/bash
+MAX_USAGE=90
+EMAIL="admin@example.com"
+USAGE=$(df / | grep / | awk '{ print $5}' | sed 's/%//g')
+if [ $USAGE -gt $MAX_USAGE ]; then
+    echo "Running out of disk space" | mail -s "Disk Space Alert" $EMAIL
+fi
+```
+
+`df` reports disk usage, `awk` slices text columns, `sed` transforms streams, `mail` sends the message. A tiny script, a big payoff.
+
+---
+
+I know I'll also need CI/CD, infrastructure as code (IaC), virtualization, and containerization — plus the tools that implement them: Docker, Jenkins, Kubernetes, Ansible, and the rest. This is the first step of many.
+
+Cheers to the journey.
+
+---
+
+*Originally published on [dev.to](https://dev.to/brunomguimaraes/my-road-to-learn-devops-part-1-502b) — June 2023. Part 1 of a series.*

@@ -33,6 +33,12 @@ export default async function Post({
   const post = await getPost(slug);
   if (!post) notFound();
 
+  const seriesTag = post.tags.find((t) => t.startsWith("series-"));
+  const isArchive = post.tags.includes("archive");
+  const visibleTags = post.tags.filter(
+    (t) => !t.startsWith("series-") && t !== "archive",
+  );
+
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 font-mono text-accent-soft">
       <nav className="mb-10 text-xs uppercase tracking-[0.18em] text-accent-dim">
@@ -40,8 +46,21 @@ export default async function Post({
       </nav>
 
       <article className="prose-matrix">
-        <div className="text-[11px] uppercase tracking-[0.14em] text-accent">
-          [{post.date}] {post.tags.map((t) => `#${t}`).join(" ")}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] uppercase tracking-[0.14em] text-accent">
+          <span>[{post.date}]</span>
+          {visibleTags.length > 0 && (
+            <span>{visibleTags.map((t) => `#${t}`).join(" ")}</span>
+          )}
+          {seriesTag && (
+            <span className="rounded-sm border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] tracking-[0.18em]">
+              series · {seriesTag.replace(/^series-/, "")}
+            </span>
+          )}
+          {isArchive && (
+            <span className="rounded-sm border border-accent-dim/40 bg-white/5 px-1.5 py-0.5 text-[10px] tracking-[0.18em] text-accent-dim">
+              archive
+            </span>
+          )}
         </div>
         <h1 className="mt-1 text-4xl font-bold text-white tracking-tight">{post.title}</h1>
         <p className="mt-2 text-accent-soft/80">{post.description}</p>
