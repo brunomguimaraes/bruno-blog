@@ -91,54 +91,42 @@ export function useIdle(ms: number, onIdle: () => void, onWake?: () => void) {
 /**
  * Fires `onOpen` the first time we think DevTools is open.
  *
- * Two heuristics, OR'd together:
- *  - window dimension delta (outer vs inner) crosses a threshold
- *  - console.debug(object-with-getter) — DevTools calls the getter when it
- *    tries to render the object in the console panel, which only happens if
- *    the console panel is actually open.
+ * Heuristic: window dimension delta. When DevTools docks to the side
+ * or bottom, `outerWidth - innerWidth` or `outerHeight - innerHeight`
+ * jumps well past the THRESHOLD. Cheap and silent.
  *
- * Neither is 100% reliable in isolation. Together they catch ~all browsers
- * + docked/undocked configurations. The callback is fired at most once.
+ * An earlier implementation also used a `console.debug(obj-with-getter)`
+ * trap to catch undocked DevTools, but that spammed the console every
+ * 1.5s for anyone with verbose logging enabled and kept polling forever
+ * because the interval wasn't cleared after detection. Not worth the
+ * noise for a single easter-egg discovery — docked DevTools is by far
+ * the common case. Callback fires at most once; the interval + resize
+ * listener are torn down immediately after detection to stop polling.
  */
 export function useDevTools(onOpen: () => void) {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let opened = false;
-    const fire = () => {
-      if (opened) return;
-      opened = true;
-      onOpen();
-    };
-
-    // Heuristic #1: window deltas
     const THRESHOLD = 160;
+    let fired = false;
+    let iv: number | undefined;
+
     function check() {
+      if (fired) return;
       const dh = window.outerHeight - window.innerHeight;
       const dw = window.outerWidth - window.innerWidth;
-      if (dh > THRESHOLD || dw > THRESHOLD) fire();
+      if (dh > THRESHOLD || dw > THRESHOLD) {
+        fired = true;
+        onOpen();
+        if (iv !== undefined) window.clearInterval(iv);
+        window.removeEventListener("resize", check);
+      }
     }
 
-    // Heuristic #2: getter trap via console.debug
-    const trap: { id?: string } = {};
-    Object.defineProperty(trap, "id", {
-      configurable: true,
-      get() {
-        fire();
-        return "bruno@bridge";
-      },
-    });
-
-    const iv = window.setInterval(() => {
-      check();
-      // debug is swallowed by the default console filter, so no visible noise
-      // when DevTools is closed. When open, the formatter reads `trap.id`
-      // to render the object, which fires the getter.
-      console.debug(trap);
-    }, 1500);
+    iv = window.setInterval(check, 1500);
     check();
     window.addEventListener("resize", check);
     return () => {
-      window.clearInterval(iv);
+      if (iv !== undefined) window.clearInterval(iv);
       window.removeEventListener("resize", check);
     };
   }, [onOpen]);
