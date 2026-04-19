@@ -53,6 +53,21 @@ function PaneShell({
         <span className="dot" />
         <span>{title}</span>
         <span className="num">{num}</span>
+        {isZoomTarget && (
+          <button
+            type="button"
+            className="zoom-exit"
+            aria-label="exit fullscreen"
+            title="exit fullscreen (Esc)"
+            onClick={(e) => {
+              e.stopPropagation();
+              withViewTransition(() => setZoomed(false));
+            }}
+          >
+            <span aria-hidden>esc</span>
+            <span aria-hidden className="x">×</span>
+          </button>
+        )}
       </header>
       <div className="scan" aria-hidden />
       <div className="body">{children}</div>
@@ -61,7 +76,7 @@ function PaneShell({
 }
 
 export function HeroPane() {
-  const { triggerStorm, discover, focusedPane, zoomed, setFocusedPane } = useEasterEggs();
+  const { triggerStorm, discover, focusedPane, zoomed, setFocusedPane, setZoomed } = useEasterEggs();
   const isFocused = focusedPane === "hero";
   const isZoomTarget = isFocused && zoomed;
   return (
@@ -86,6 +101,21 @@ export function HeroPane() {
         <span className="dot" />
         <span>hero.tsx</span>
         <span className="num">[0]</span>
+        {isZoomTarget && (
+          <button
+            type="button"
+            className="zoom-exit"
+            aria-label="exit fullscreen"
+            title="exit fullscreen (Esc)"
+            onClick={(e) => {
+              e.stopPropagation();
+              withViewTransition(() => setZoomed(false));
+            }}
+          >
+            <span aria-hidden>esc</span>
+            <span aria-hidden className="x">×</span>
+          </button>
+        )}
       </header>
       <div
         className="body"
