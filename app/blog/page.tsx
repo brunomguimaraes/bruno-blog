@@ -9,7 +9,7 @@ export const metadata = {
 export default async function BlogIndex() {
   const posts = await getAllPosts();
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16 font-mono text-accent-soft">
+    <main className="mx-auto w-full max-w-2xl px-6 py-16 font-mono text-accent-soft">
       <nav className="mb-10 text-xs uppercase tracking-[0.18em] text-accent-dim">
         <Link href="/" className="hover:text-accent">← /home</Link>
       </nav>

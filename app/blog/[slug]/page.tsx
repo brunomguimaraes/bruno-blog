@@ -62,7 +62,7 @@ export default async function Post({
   );
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16 font-mono text-accent-soft">
+    <main className="mx-auto w-full max-w-2xl px-6 py-16 font-mono text-accent-soft">
       <ReadProgress />
       <nav className="mb-10 text-xs uppercase tracking-[0.18em] text-accent-dim">
         <Link href="/blog" className="hover:text-accent">← /blog</Link>
