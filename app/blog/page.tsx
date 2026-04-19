@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
+import RssSubscribe from "@/components/RssSubscribe";
 
 export const metadata = {
   title: "Blog — Bruno Guimaraes",
@@ -14,9 +15,12 @@ export default async function BlogIndex() {
         <Link href="/" className="hover:text-accent">← /home</Link>
       </nav>
       <h1 className="mb-2 text-4xl font-bold text-white tracking-tight">~/blog</h1>
-      <p className="mb-10 text-sm text-accent-dim">
-        {posts.length} entries. Press <kbd className="rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 text-[11px]">?</kbd> anywhere for shortcuts.
-      </p>
+      <div className="mb-10 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-accent-dim">
+          {posts.length} entries. Press <kbd className="rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 text-[11px]">?</kbd> anywhere for shortcuts.
+        </p>
+        <RssSubscribe />
+      </div>
 
       <ul className="space-y-4">
         {posts.map((p) => {

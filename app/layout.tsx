@@ -1,6 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import GlobalShell from "@/components/GlobalShell";
+import {
+  FEED_PATH,
+  FEED_TITLE,
+  SITE_DESCRIPTION,
+  SITE_LOCALE,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -32,12 +41,6 @@ const SOURCE_BANNER = `
 -->
 `;
 
-const SITE_URL = "https://www.brunao.dev";
-const SITE_NAME = "bruno.dev";
-const SITE_TITLE = "Bruno Guimaraes — fullstack developer";
-const SITE_DESCRIPTION =
-  "Fullstack developer. Portfolio + blog living inside a terminal-flavored tiled workspace — 20 hidden features waiting to be found.";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -63,6 +66,12 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "/",
+    // Autodiscovery for feed readers (NetNewsWire, Feedly, Reeder, etc).
+    // Emits <link rel="alternate" type="application/rss+xml" href="/feed.xml">
+    // into every page <head>.
+    types: {
+      "application/rss+xml": [{ url: FEED_PATH, title: FEED_TITLE }],
+    },
   },
   // The actual <link rel="icon" | "apple-touch-icon"> tags are emitted
   // automatically by Next.js from the file-based conventions:
@@ -78,7 +87,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    locale: "en_US",
+    locale: SITE_LOCALE,
   },
   twitter: {
     card: "summary_large_image",

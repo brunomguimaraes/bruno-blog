@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllPosts, getPost } from "@/lib/posts";
 import ReadProgress from "@/components/ReadProgress";
+import RssSubscribe from "@/components/RssSubscribe";
 
 type Params = { slug: string };
 
@@ -90,6 +91,11 @@ export default async function Post({
         <hr className="my-8 border-accent/20" />
         <MDXRemote source={post.content} />
       </article>
+
+      <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-accent/15 pt-6 text-xs uppercase tracking-[0.18em] text-accent-dim">
+        <Link href="/blog" className="hover:text-accent">← all posts</Link>
+        <RssSubscribe label="subscribe" />
+      </footer>
     </main>
   );
 }
