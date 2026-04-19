@@ -364,7 +364,14 @@ a.link:hover {
 .wm.zoomed .pane { display: none; }
 .wm.zoomed .pane.zoom-target {
   display: flex;
-  grid-area: z;
+  /* `!important` is required: each pane has an inline
+     `style={{ gridArea: id }}` (specificity 1,0,0,0) that would otherwise
+     win over this selector (specificity 0,0,3,0), parking the zoom-target
+     in an implicit auto-placement track (e.g. a 2×220 sliver) instead of
+     the explicit "z" area. */
+  grid-area: z !important;
+  width: 100% !important;
+  height: 100% !important;
   /* Named view-transition: the browser snapshots just this element when
      toggling, so the zoom animates independently of the rest of the page
      (instead of cross-fading the whole root). */
@@ -1110,6 +1117,11 @@ body.alarming { animation: bodyShake 0.06s infinite; }
 .prose-matrix li { margin: 0.3em 0; }
 .prose-matrix hr { border: 0; border-top: 1px solid var(--border); margin: 2.2em 0; }
 .prose-matrix strong { color: #eaf7ff; }
+.prose-matrix img { max-width: 100%; height: auto; }
+.prose-matrix table { display: block; max-width: 100%; overflow-x: auto; }
+.prose-matrix { overflow-wrap: anywhere; }
+.prose-matrix :not(pre) > code { word-break: break-word; }
+.prose-matrix iframe, .prose-matrix video { max-width: 100%; }
 
 /* ────────────── reading progress (scroll-driven CSS) ──────────────
    The `.read-progress` bar is positioned along the top of the viewport

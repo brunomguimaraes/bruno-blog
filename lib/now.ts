@@ -20,7 +20,7 @@ const POOL: NowEntry[] = [
   { kind: "ok",   text: "refactoring a hot path from O(n²) to O(n log n)." },
   { kind: "warn", text: "a flaky test that only fails at 3am." },
   { kind: "ok",   text: "drafting a post on backpressure in Node streams." },
-  { kind: "err",  text: "coffee budget exceeded for the month." },
+  { kind: "err",  text: "ice tea budget exceeded for the month." },
   { kind: "ok",   text: "cleaning up 18 months of TODOs in an old repo." },
   { kind: "ok",   text: "pairing on a TypeScript migration — week 3 of 6." },
   { kind: "warn", text: "prod alert at lunch. misconfigured cron." },
