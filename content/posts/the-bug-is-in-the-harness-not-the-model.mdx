@@ -5,7 +5,7 @@ tags: ["agents", "claude-code", "ai-engineering"]
 description: "Two months of 'Claude Code got worse' turned out to be three harness bugs. The model never drifted."
 ---
 
-For two months, my team kept saying "Claude Code feels worse this week." Every Monday someone would say it. I half-believed it myself. Then Anthropic published a [postmortem](https://simonwillison.net/2026/Apr/24/recent-claude-code-quality-reports/) that traced the wave of complaints to three harness bugs. None of them touched the model.
+For two months, I hear people saying "Claude Code feels worse this week." Every Monday someone would say it. I half-believed it myself. Then Anthropic published a [postmortem](https://simonwillison.net/2026/Apr/24/recent-claude-code-quality-reports/) that traced the wave of complaints to three harness bugs. None of them touched the model.
 
 The one I keep thinking about: That change was meant to clear stale chain-of-thought from idle sessions. The fix worked. It also kept clearing thinking on every turn for the rest of that session. Walk away for an hour, come back, and every reply afterward started fresh, no memory of the work it had been doing, for as long as you kept the session open. From the outside, it looked exactly like the model getting dumber after lunch.
 
