@@ -7,27 +7,27 @@ description: "Two months of 'Claude Code got worse' turned out to be three harne
 
 For two months, my team kept saying "Claude Code feels worse this week." Every Monday someone would say it. I half-believed it myself. Then Anthropic published a [postmortem](https://simonwillison.net/2026/Apr/24/recent-claude-code-quality-reports/) that traced the wave of complaints to three harness bugs. None of them touched the model.
 
-The one I keep thinking about: a March 26 change was meant to clear stale chain-of-thought from idle sessions. The fix worked. It also kept clearing thinking on every turn for the rest of that session. Walk away for an hour, come back, and every reply afterward started fresh — no memory of the work it had been doing — for as long as you kept the session open. From the outside, it looked exactly like the model getting dumber after lunch.
+The one I keep thinking about: That change was meant to clear stale chain-of-thought from idle sessions. The fix worked. It also kept clearing thinking on every turn for the rest of that session. Walk away for an hour, come back, and every reply afterward started fresh, no memory of the work it had been doing, for as long as you kept the session open. From the outside, it looked exactly like the model getting dumber after lunch.
 
-The lesson isn't that Anthropic's harness has bugs. Of course it does — it's a state machine sequencing prompts, trimming context, managing rate limits, and recovering from failures, all without the model noticing. The lesson is that "the model got worse" is almost never the right diagnosis when you ship anything agentic. The harness is the thing that drifted. The model is just the easy thing to suspect because it's the part you don't control.
+The lesson isn't that Anthropic's harness has bugs. Of course it does, it's a state machine sequencing prompts, trimming context, managing rate limits, and recovering from failures, all without the model noticing. The lesson is that "the model got worse" is almost never the right diagnosis when you ship anything agentic. The harness is the thing that drifted. The model is just the easy thing to suspect because it's the part you don't control.
 
 ## The harness is infrastructure now
 
 I notice this every time I write code that calls an agent. The model is the cheap part. The expensive part is everything around it: the tool router, the context budget, the retry policy, the cancellation semantics, the idempotency keys for tool calls that might fire twice. None of that is glue code anymore. It is the system.
 
-Cloudflare made the same point this week from a completely different runtime. Their writeup of [making Rust Workers reliable](https://blog.cloudflare.com/making-rust-workers-reliable/) is about a panic in any wasm-bindgen Worker poisoning the sandbox for the rest of its life — a known sharp edge that took an upstream `panic=unwind` plus an abort-recovery path to actually fix. Not a Rust bug. Not a wasm bug. A bug in the layer that runs Rust on top of wasm. Same shape as the Claude Code thinking-trim regression: the surrounding state machine got something subtly wrong, and from the outside the engine looked broken.
+Cloudflare made the same point this week from a completely different runtime. Their writeup of [making Rust Workers reliable](https://blog.cloudflare.com/making-rust-workers-reliable/) is about a panic in any wasm-bindgen Worker poisoning the sandbox for the rest of its life, a known sharp edge that took an upstream `panic=unwind` plus an abort-recovery path to actually fix. Not a Rust bug. Not a wasm bug. A bug in the layer that runs Rust on top of wasm. Same shape as the Claude Code thinking-trim regression: the surrounding state machine got something subtly wrong, and from the outside the engine looked broken.
 
 ## Treat the LLM as the unreliable component
 
-Murat's [writeup of Will Wilson's BugBash'26 keynote](http://muratbuffalo.blogspot.com/2026/04/bugbash26-keynote.html) flips the frame in the most useful way I've read all month. Wilson, who runs Antithesis, argues the production play isn't to wait for LLMs to become reliable enough to trust. It's to assume they won't be — and to build the harness so that unreliable LLMs are a substrate for reliable software. Treat the model as a fault injector. Make the system around it the part that holds.
+Murat's [writeup of Will Wilson's BugBash'26 keynote](http://muratbuffalo.blogspot.com/2026/04/bugbash26-keynote.html) flips the frame in the most useful way I've read all month. Wilson, who runs Antithesis, argues the production play isn't to wait for LLMs to become reliable enough to trust. It's to assume they won't be, and to build the harness so that unreliable LLMs are a substrate for reliable software. Treat the model as a fault injector. Make the system around it the part that holds.
 
-That maps cleanly onto the postmortem. If you assume the model can return garbage on any turn — wrong tool name, dropped context, fabricated path — then the bug-prone surface is the deterministic code handling the response. Which is exactly the surface the Anthropic team had to debug for two months.
+That maps cleanly onto the postmortem. If you assume the model can return garbage on any turn, wrong tool name, dropped context, fabricated path, then the bug-prone surface is the deterministic code handling the response. Which is exactly the surface the Anthropic team had to debug for two months.
 
 ## What I'm changing
 
 A few small things, after this week:
 
-- When a session feels off, I check the harness first now — what got rolled out, what changed in context handling, whether retries are silently shortening turns — before I blame the model.
+- When a session feels off, I check the harness first now, what got rolled out, what changed in context handling, whether retries are silently shortening turns, before I blame the model.
 - Tool wrappers I write get the same scrutiny as a cron job. Idempotency, timeouts, structured logging on the call boundary. Not "I'll add it later."
 - I stopped describing my agent code as "glue." It isn't glue. It's the runtime.
 
