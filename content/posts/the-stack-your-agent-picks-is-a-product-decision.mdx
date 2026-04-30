@@ -39,13 +39,7 @@ The `Custom/DIY` pattern bothers me most in product surfaces where operations ma
 
 Feature flags. Secret management. Rate limiting. RBAC. Image and media processing. Headless CMS. These were all categories where `Custom/DIY` won for both agents or showed up heavily in the table. Some of those are fine to build in a weekend for an internal tool. Some turn into scar tissue inside a product company.
 
-At TeachMe.To, I owned a product area where the technical choice and the product choice were the same conversation. I was not just shipping React and APIs. I was looking at retention cohorts, finding a 16 percentage-point gap, and turning that into a product pivot. I found a 40 percent conversion drop-off in a funnel and had to think about what work would move the business, not what work would feel clean in a pull request.
-
-That changes how I hear "just build the feature flags."
-
-If flags decide which cohort sees which marketplace flow, they are part of the analytics story. If permissions decide who can approve a venue, warn a partner, or change location data, they are part of operations. If a rate limit hits a paid instructor during a booking spike, the implementation detail has become a business problem.
-
-Same with Stripe. I have built subscription and webhook flows. I have also built payment event processing as a separate Go service. Payment code punishes cute architecture. You care about retries, event ordering, idempotency, reconciliation, and boring logs. An agent recommending custom ownership for a payment-adjacent surface should trigger the same response as a junior engineer saying it in planning: maybe, but show me the failure path first.
+I have built with Stripe subscription and webhook flows. I have also built payment event processing as a separate Go service. Payment code punishes cute architecture. You care about retries, event ordering, idempotency, reconciliation, and boring logs. An agent recommending custom ownership for a payment-adjacent surface should trigger the same response as a junior engineer saying it in planning: maybe, but show me the failure path first.
 
 That is the practical line I would draw. I am happy to let agents write custom glue. I am much slower to accept custom ownership of a surface where the cost shows up in support, analytics, billing, or compliance.
 
