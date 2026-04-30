@@ -1,0 +1,70 @@
+---
+title: "The stack your agent picks is a product decision"
+date: "2026-04-30"
+tags: ["agents", "ai-engineering", "product-engineering"]
+description: "Coding agents are becoming default stack selectors. The risk is not always a bad pick. It is a reasonable local optimum that quietly becomes production."
+---
+
+I used to think stack choice was one of the places where senior taste stayed obvious. You picked the boring thing when the business needed boring. You picked the weird thing when the problem paid for weird. You wrote down the tradeoff, then lived with it.
+
+That is still true. The difference now is that a coding agent can make the first pick before I have finished thinking.
+
+[Amplifying.ai's comparison of Codex and Claude Code](https://amplifying.ai/research/codex-vs-claude-code-picks#cat-image-media) makes that feel less like a vibe and more like something I need to account for. They ran two coding agents across five repo shapes and twelve categories, with three runs each. The result was 1,452 analyzable tool picks. The number that stuck with me: the agents agreed on the top pick in seven of twelve categories, and six of those seven were `Custom/DIY`.
+
+That is a strange default to inherit silently.
+
+Custom code can be the right answer. I have written plenty of it. I have also cleaned up enough custom code to know that "we can build this ourselves" is rarely a pure engineering sentence. It is an operations sentence. Who rotates the secret? Who owns the retry path? Who answers the support ticket when a paid customer hits the rate limit wrong? Who explains the permission bug to the team that trusted the admin screen?
+
+The agent does not feel that future weight. It sees a repo.
+
+## where the agent gets its taste
+
+One detail in the Amplifying.ai piece matters more to me than the brand names: "The repo a prompt runs against shapes the recommendation." Their examples are simple. A Next.js project can surface Vercel Cron. A Rails project can surface Pundit. That is not bad behavior. In an existing codebase, it is usually what I want.
+
+If I drop an agent into a real product, I want imitation first. Follow the lockfile. Copy the API shape. Notice that we already use Stripe webhooks in a Go service, or Prisma behind an Apollo API, or Mapbox clustering in an admin flow. The fastest way for an agent to be useful is to stop asking the repo to become a different repo.
+
+I see this with The Keep. It is a markdown-native multi-agent system because that is the shape I chose: agents, rubrics, source-of-truth files, and workflow state live in markdown or YAML. TypeScript shows up where I/O makes it pay rent: Gmail, Discord, RSS, captions, GitHub Actions. If an agent working in that repo suggests a database-backed dashboard for every new workflow, it is missing the local rule. If it writes another markdown skill file that fits the system, it has learned the room.
+
+That kind of imitation is a feature.
+
+The problem starts earlier, when there is not much room to learn. A greenfield repo is a vacuum with a `package.json`. In that vacuum, the agent reaches for whatever looks locally optimal: the framework family, the hosting platform, the package names it has seen often enough, and the training snapshot it carries around.
+
+In the Amplifying.ai results, Claude picked Bun as the JavaScript runtime in 63 percent of responses. Codex picked Bun in 13 percent. Codex picked Statsig as the primary feature flag choice 27 percent of the time. Claude picked it zero times, even though it mentioned Statsig in 28 percent of feature flag responses. Codex also leaned toward Cloudflare-branded tools in the selected platform counts, while Claude leaned more toward Vercel.
+
+I do not need a conspiracy theory for that to matter. The research is careful here too. It says the gaps show correlation, not cause.
+
+That is enough. Defaults with gravity still shape products.
+
+## where custom gets expensive
+
+The `Custom/DIY` pattern bothers me most in product surfaces where operations matter.
+
+Feature flags. Secret management. Rate limiting. RBAC. Image and media processing. Headless CMS. These were all categories where `Custom/DIY` won for both agents or showed up heavily in the table. Some of those are fine to build in a weekend for an internal tool. Some turn into scar tissue inside a product company.
+
+At TeachMe.To, I owned a product area where the technical choice and the product choice were the same conversation. I was not just shipping React and APIs. I was looking at retention cohorts, finding a 16 percentage-point gap, and turning that into a product pivot. I found a 40 percent conversion drop-off in a funnel and had to think about what work would move the business, not what work would feel clean in a pull request.
+
+That changes how I hear "just build the feature flags."
+
+If flags decide which cohort sees which marketplace flow, they are part of the analytics story. If permissions decide who can approve a venue, warn a partner, or change location data, they are part of operations. If a rate limit hits a paid instructor during a booking spike, the implementation detail has become a business problem.
+
+Same with Stripe. I have built subscription and webhook flows. I have also built payment event processing as a separate Go service. Payment code punishes cute architecture. You care about retries, event ordering, idempotency, reconciliation, and boring logs. An agent recommending custom ownership for a payment-adjacent surface should trigger the same response as a junior engineer saying it in planning: maybe, but show me the failure path first.
+
+That is the practical line I would draw. I am happy to let agents write custom glue. I am much slower to accept custom ownership of a surface where the cost shows up in support, analytics, billing, or compliance.
+
+## my rule for agent defaults
+
+I do not want to fight the agent on every pick. That is a waste of the tool.
+
+I want three layers of defaults.
+
+First, personal defaults. The boring ones. Package manager. Test command. TypeScript strictness. Auth library I prefer this year. Where I do and do not want custom code. The stuff I am tired of repeating should live in an agent instruction file, not in my next thirty chat messages.
+
+Second, repo defaults. This is where agents are strongest. If the codebase already has a pattern, the agent should imitate it unless I ask for a change. A Next.js App Router codebase should not get a Pages Router island because the model saw more old examples. A markdown-native system should stay markdown-native until the workflow proves it needs a database. A product API that already has Stripe webhook conventions should not invent a second way to process money events.
+
+Third, challenge defaults for operational surfaces. When an agent says `Custom/DIY` for flags, secrets, RBAC, rate limiting, media processing, notifications, billing, or anything that creates support load, I want a written tradeoff. What do I own forever if I accept this? What vendor would remove that ownership? What product behavior gets harder to measure? What happens when the happy path fails?
+
+That last one is where senior engineering still has teeth.
+
+I do not expect agents to choose terrible stacks. Most of their picks will be reasonable. That is what makes them worth using, and also what makes them worth supervising. A reasonable local optimum can ship for months before anyone notices that it was tuned for the repo shape, the vendor weather, and last year's memory.
+
+So I am writing my defaults down. I am letting agents copy the codebase when the codebase already knows itself. And when the agent wants to build the operational part from scratch, I am making it argue like someone who will be on call for it.
