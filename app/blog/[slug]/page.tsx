@@ -4,6 +4,9 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllPosts, getPost } from "@/lib/posts";
 import ReadProgress from "@/components/ReadProgress";
 import RssSubscribe from "@/components/RssSubscribe";
+import BlogImage from "@/components/BlogImage";
+
+const mdxComponents = { img: BlogImage };
 
 type Params = { slug: string };
 
@@ -63,7 +66,7 @@ export default async function Post({
   );
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-16 font-mono text-accent-soft">
+    <main className="mx-auto w-full max-w-2xl px-6 py-16 font-mono text-accent-soft lg:max-w-3xl">
       <ReadProgress />
       <nav className="mb-10 text-xs uppercase tracking-[0.18em] text-accent-dim">
         <Link href="/blog" className="hover:text-accent">← /blog</Link>
@@ -89,7 +92,7 @@ export default async function Post({
         <h1 className="mt-1 text-4xl font-bold text-white tracking-tight">{post.title}</h1>
         <p className="mt-2 text-accent-soft/80">{post.description}</p>
         <hr className="my-8 border-accent/20" />
-        <MDXRemote source={post.content} />
+        <MDXRemote source={post.content} components={mdxComponents} />
       </article>
 
       <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-accent/15 pt-6 text-xs uppercase tracking-[0.18em] text-accent-dim">
