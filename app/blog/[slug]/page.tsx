@@ -5,6 +5,7 @@ import { getAllPosts, getPost } from "@/lib/posts";
 import ReadProgress from "@/components/ReadProgress";
 import RssSubscribe from "@/components/RssSubscribe";
 import BlogImage from "@/components/BlogImage";
+import { getSkills } from "@/lib/skills";
 
 const mdxComponents = { img: BlogImage };
 
@@ -58,6 +59,7 @@ export default async function Post({
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();
+  const relatedSkills = (await getSkills()).filter((skill) => skill.relatedPost === slug);
 
   const seriesTag = post.tags.find((t) => t.startsWith("series-"));
   const isArchive = post.tags.includes("archive");
@@ -94,6 +96,13 @@ export default async function Post({
         <hr className="my-8 border-accent/20" />
         <MDXRemote source={post.content} components={mdxComponents} />
       </article>
+
+      {relatedSkills.length > 0 && <aside className="mt-10 rounded-lg border border-accent/25 bg-accent/5 p-5">
+        <h2 className="text-sm font-bold text-white">Put it to work</h2>
+        {relatedSkills.map((skill) => <Link key={skill.slug} href={`/skills#${skill.slug}`} className="mt-3 block text-sm text-accent hover:underline">
+          {skill.title} → <span className="mt-1 block text-xs leading-6 text-accent-dim">{skill.summary}</span>
+        </Link>)}
+      </aside>}
 
       <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-accent/15 pt-6 text-xs uppercase tracking-[0.18em] text-accent-dim">
         <Link href="/blog" className="hover:text-accent">← all posts</Link>

@@ -11,20 +11,24 @@ import {
   BlogPane,
   ContactPane,
   RootPane,
+  SkillsPane,
 } from "@/components/Panes";
 import { useEasterEggs } from "@/components/easter-eggs/context";
 import { useGamepad } from "@/components/easter-eggs/hooks";
 import type { Post } from "@/lib/posts";
 import type { NowEntry } from "@/lib/now";
+import type { Skill } from "@/lib/skills";
 
-const PANE_ORDER = ["hero", "whoami", "now", "blog", "contact"];
+const PANE_ORDER = ["hero", "whoami", "now", "blog", "contact", "skills"];
 
 export default function HomePage({
   posts,
   nowEntries,
+  skills,
 }: {
   posts: Post[];
   nowEntries: NowEntry[];
+  skills: Pick<Skill, "slug" | "title" | "summary">[];
 }) {
   const {
     zoomed,
@@ -73,18 +77,8 @@ export default function HomePage({
     };
   }, []);
 
-  // Tab cycling between panes
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key !== "Tab") return;
-      const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
-      e.preventDefault();
-      cyclePane(e.shiftKey ? -1 : 1);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [cyclePane]);
+  // Native Tab order reaches both pane roots and the links inside them.
+  // Gamepad navigation still cycles directly between pane roots.
 
   // Pilot mode — Gamepad API. D-pad cycles panes, A opens the palette,
   // Y runs storm, B red-alert, X toggles anomaly. We discover "pilot-mode"
@@ -122,6 +116,7 @@ export default function HomePage({
         <NowPane entries={nowEntries} />
         <BlogPane posts={posts} />
         <ContactPane />
+        <SkillsPane skills={skills} />
         <RootPane />
         <ColumnSplitter targetRef={wmRef} />
       </div>

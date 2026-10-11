@@ -51,4 +51,5 @@ export const COMMANDS: CommandDef[] = [
   { id: "hollow", label: "Dock at /hollow", ico: "#", action: "toggleRoot" },
   { id: "reset-layout", label: "Reset bulkheads (columns)", ico: "⇔", action: "resetLayout" },
   { id: "go-blog", label: "Go to /blog", ico: "→", action: "goBlog" },
+  { id: "go-skills", label: "Go to /skills", ico: "→", action: "goSkills" },
 ];

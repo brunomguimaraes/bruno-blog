@@ -8,6 +8,7 @@ import MatrixRain from "@/components/MatrixRain";
 import GlitchText from "@/components/GlitchText";
 import type { Post } from "@/lib/posts";
 import type { NowEntry } from "@/lib/now";
+import type { Skill } from "@/lib/skills";
 
 function PaneShell({
   id,
@@ -27,6 +28,7 @@ function PaneShell({
   const isZoomTarget = isFocused && zoomed;
   return (
     <section
+      id={id}
       className={
         "pane " +
         (isFocused ? "focused " : "") +
@@ -147,6 +149,7 @@ export function HeroPane() {
         </div>
         <div className="btns">
           <Link href="/blog" className="btn primary">read the blog</Link>
+          <Link href="/skills" className="btn">take a skill</Link>
           <a className="btn" href="mailto:mguimaraesbruno@gmail.com">email me</a>
           <a
             className="btn"
@@ -264,6 +267,22 @@ export function ContactPane() {
       </div>
     </PaneShell>
   );
+}
+
+export function SkillsPane({ skills }: { skills: Pick<Skill, "slug" | "title" | "summary">[] }) {
+  return <PaneShell id="skills" title="skills/" num="[5]">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm text-accent-dim">Small instructions. One useful job each.</p>
+      <Link href="/skills" className="link text-xs">browse the toolbox →</Link>
+    </div>
+    <div className="grid gap-3 md:grid-cols-3">
+      {skills.map((skill) => <Link href={`/skills#${skill.slug}`} key={skill.slug} className="rounded border border-accent/20 p-4 transition hover:border-accent/60 hover:bg-accent/5">
+        <h2 className="text-sm text-white">{skill.title}</h2>
+        <p className="mt-2 text-xs leading-5 text-accent-dim">{skill.summary}</p>
+        <span className="mt-3 block text-[11px] text-accent">read / install →</span>
+      </Link>)}
+    </div>
+  </PaneShell>;
 }
 
 export function RootPane() {

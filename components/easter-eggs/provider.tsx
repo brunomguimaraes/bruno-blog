@@ -482,7 +482,7 @@ export default function EasterEggsProvider({ children }: { children: React.React
       }
 
       // Enter → bridge-zoom focused pane (View Transitions–smooth)
-      if (e.key === "Enter" && focusedPane) {
+      if (e.key === "Enter" && focusedPane && target?.matches("[data-pane-id]")) {
         e.preventDefault();
         withViewTransition(() => setZoomed((v) => !v));
         if (!zoomed) discover("zoom");
@@ -566,6 +566,9 @@ export default function EasterEggsProvider({ children }: { children: React.React
           break;
         case "goBlog":
           router.push("/blog");
+          break;
+        case "goSkills":
+          router.push("/skills");
           break;
       }
     },

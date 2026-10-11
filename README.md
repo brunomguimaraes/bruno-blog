@@ -91,6 +91,24 @@ Press `?` in the running app to see the live bridge manual — it obscures undis
 | plug in a gamepad | Pilot mode — D-pad panes · A palette · Y storm · B alarm |
 | drag the column gutter | Reconfigure bulkheads — layout saved to the URL hash |
 
+## Shareable skills
+
+`/skills` is a searchable catalog built from `skills/<slug>/SKILL.md`. Each skill
+has a copyable install command, a direct Markdown download, readable source,
+and an optional related article. The homepage links to the catalog and related
+posts show their companion skill. The instructions in `skills/` are MIT licensed.
+
+Use the existing files as the metadata format: `name`, `description`, and
+`metadata` with `title`, `summary`, `category`, `updated`, and optional
+`related-post`. A new folder becomes a catalog entry on the next deployment.
+Keep each skill limited to one useful job. Include its file with the article's
+review package when publishing through the weekly editorial workflow.
+
+The weekly reader/writer lives in the companion `the-keep` repository. Its
+`docs/weekly-editorial.md` describes Cloudflare coordination, Claude cloud
+routines, Discord topic and draft votes, and Wednesday publication. Unapproved
+drafts never belong in `content/posts/` or this public repository.
+
 ## Deploy
 
 The easiest path is Vercel:

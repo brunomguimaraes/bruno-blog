@@ -11,8 +11,9 @@ export default async function BlogIndex() {
   const posts = await getAllPosts();
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16 font-mono text-accent-soft">
-      <nav className="mb-10 text-xs uppercase tracking-[0.18em] text-accent-dim">
+      <nav className="mb-10 flex gap-6 text-xs uppercase tracking-[0.18em] text-accent-dim">
         <Link href="/" className="hover:text-accent">← /home</Link>
+        <Link href="/skills" className="hover:text-accent">/skills</Link>
       </nav>
       <h1 className="mb-2 text-4xl font-bold text-white tracking-tight">~/blog</h1>
       <div className="mb-10 flex flex-wrap items-center justify-between gap-3">

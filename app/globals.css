@@ -185,11 +185,12 @@ a.link:hover {
   --wm-col1: 1.3fr;
   --wm-col2: 1fr;
   grid-template-columns: var(--wm-col1) var(--wm-col2);
-  grid-template-rows: 1.1fr 0.9fr 0.9fr;
+  grid-template-rows: 1.1fr 0.9fr 0.9fr auto;
   grid-template-areas:
     "hero whoami"
     "hero now"
-    "blog contact";
+    "blog contact"
+    "skills skills";
 }
 
 /* Draggable vertical gutter between columns. Hidden on single-column layouts
@@ -227,7 +228,7 @@ a.link:hover {
     padding-bottom: calc(var(--cmd-h, 96px) + 8px);
     grid-template-columns: 1fr;
     grid-template-rows: auto;
-    grid-template-areas: "hero" "whoami" "now" "blog" "contact";
+    grid-template-areas: "hero" "whoami" "now" "blog" "contact" "skills";
   }
   /* Hero body is position: absolute; inset: 0, so the section has no
      intrinsic height — it only inherits .pane { min-height: 220px }, which
@@ -646,13 +647,20 @@ body.alarming { animation: bodyShake 0.06s infinite; }
 
 /* /root pane — only visible when wm.root-on */
 .root-pane { grid-area: root; display: none; }
-.wm.root-on {
+.wm.root-on:not(.zoomed) {
   grid-template-areas:
     "hero whoami"
     "hero now"
     "blog contact"
+    "skills skills"
     "root root" !important;
-  grid-template-rows: 1.1fr 0.9fr 0.9fr 0.7fr !important;
+  grid-template-rows: 1.1fr 0.9fr 0.9fr auto 0.7fr !important;
+}
+@media (max-width: 900px) {
+  .wm.root-on:not(.zoomed) {
+    grid-template-areas: "hero" "whoami" "now" "blog" "contact" "skills" "root" !important;
+    grid-template-rows: auto !important;
+  }
 }
 .wm.root-on .root-pane { display: flex; }
 .root-pane > header {
