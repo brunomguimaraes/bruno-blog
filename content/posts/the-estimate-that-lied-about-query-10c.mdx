@@ -1,0 +1,48 @@
+---
+title: "How an index made one query 8x slower, step by step"
+date: "2026-10-14"
+tags: ["postgres", "performance"]
+description: "A measured case where a cheaper-looking index sent Postgres into a nested loop. What went wrong in the plan, and which numbers in EXPLAIN show it."
+---
+
+Prateek Arora built an index advisor, then did the check most advisor authors skip: he [built every recommended index for real and timed the queries](https://prateek-arora.github.io/2026/10/timed-179-index-recommendations/). The worst case was query 10c of the Join Order Benchmark with an index on `cast_info (movie_id)`. The planner's estimate said the query would be 91% cheaper. Measured, it went from 0.93 s to 7.3 s. A manual rerun gave roughly 1 s before and 9 s after.
+
+The query got slower because the planner changed its mind about how to join, and the new plan was based on a wrong guess. That is a pattern you can spot in any `EXPLAIN` output, so it is worth walking through.
+
+## What the index changed
+
+Arora's explanation is short. With the index present, the planner chose a nested loop that probes `cast_info` once per row coming out of a join. Nested loops are great when the outer side is small, because each probe is a cheap index lookup. The planner picked it because it believed the join would return few rows. It underestimated that join's output, so the loop ran far more times than planned, and the query read 71 times as many buffers.
+
+My reading, not a claim from the post: the index did not make the old plan worse. It offered the planner a new option that looked excellent under the numbers it had.
+
+## How to see it in a plan
+
+This is a made-up, simplified shape, not output from the benchmark, but it is what the symptom looks like:
+
+```text
+Nested Loop  (rows=40 ...) (actual rows=310000 loops=1)
+  -> Hash Join  (rows=40 ...) (actual rows=310000 loops=1)
+  -> Index Scan using cast_info_movie_id_idx on cast_info
+       (rows=1 ...) (actual rows=12 loops=310000)
+       Buffers: shared hit=... read=...
+```
+
+Three things to read:
+
+- **Estimated rows against actual rows on the node feeding the loop.** A gap of 40 against 310,000 is the whole story. Errors in a join's row count are what the benchmark was designed to provoke, and they multiply, because the inner side runs once per outer row.
+- **`loops=` on the inner node.** Per-loop numbers are averages. Multiply `actual rows` and buffers by `loops` before comparing with another plan.
+- **`Buffers:`.** Run `EXPLAIN (ANALYZE, BUFFERS)`, not plain `EXPLAIN ANALYZE`. Buffer counts are what Arora used to compare plans (71x), and they are less sensitive to a warm cache than wall time.
+
+## Why the advisor could not see this
+
+The tool in the study validated each suggestion with HypoPG: create a hypothetical index, run `EXPLAIN` again, and keep the suggestion if estimated cost drops enough. HypoPG cannot catch this failure, in Arora's words, because it asks the same planner with the same wrong row counts. The check and the failure share a cause. That applies to any process that uses estimated cost to judge whether the estimates were good.
+
+A second post from the same week, by Alexander Ioffe, shows how thin the margin can be. [He reports](https://exobench.ai/blog/postgres-disagreed-with-itself) two `EXPLAIN ANALYZE` runs on statistically identical data that chose opposite plans, 73 heap blocks against 3,449, with a cost margin of 1.5%. When two plans are that close, small differences in sampled statistics decide which one you get. I have only read the summary of that post, so I would not generalize beyond its claim: near-ties make plan choice unstable.
+
+## What to do with it
+
+When an index change, yours or a tool's, is accompanied by a plan change, check estimated against actual rows on the join feeding any nested loop before you trust the cost. If they are far apart, the cost number is not evidence. Fix the estimate (fresh `ANALYZE`, extended statistics for correlated columns) or reconsider the index.
+
+This does not mean indexes like this are bad. In the same study, 128 of 179 measured recommendations made their query at least 15% faster. The 10c case is a reminder that a plan is only as good as its row counts, and that an index is an invitation to a different plan, not only a faster lookup.
+
+Where the advice stops working: on a small table or a trivial query, a bad nested loop costs microseconds and none of this matters. And reading buffers per loop does not tell you the cause of a bad estimate, only that there is one.
