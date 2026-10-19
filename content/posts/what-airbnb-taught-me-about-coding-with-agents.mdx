@@ -1,0 +1,99 @@
+---
+title: "What Airbnb taught me about coding with agents"
+date: "2026-10-19"
+tags: ["agents", "ai-engineering", "developer-experience"]
+description: "Lessons from Airbnb on steering coding agents, reviewing their work, and building feedback loops that make automation useful in a real codebase."
+---
+
+The part of Airbnb's agentic coding talk that stayed with me was the review step. An engineer reviews what the agent produced before submitting a pull request for another engineer to review.
+
+That sounds ordinary. It becomes a much bigger commitment when an agent can generate a substantial change while you are reading a design doc.
+
+In their [DPE Summit 2025 talk](https://www.youtube.com/watch?v=o6oYc9-X9Iw), Szczepan Faber and Mike Nakhimovich describe how Airbnb approached that shift. The opening fifteen minutes cover a useful set of questions: what makes coding agentic, how engineers learn to supervise it, and what has to exist around the agent for parallel work to help.
+
+My takeaway for working with these tools in 2026 is that review capacity should shape the work I delegate. If I cannot explain the resulting change, I have more work to do before it becomes somebody else's PR.
+
+## Give the agent a loop it can finish
+
+Faber uses a pair programming analogy: the engineer navigates while the agent drives. The engineer decides where the change should go and corrects its direction. The agent does the tactical work of producing it.
+
+The [agentic loop he describes](https://www.youtube.com/watch?v=o6oYc9-X9Iw&t=419s) includes repeated model calls, tool use, configuration, and guardrails. It can read files, run tests, inspect failures, and make another attempt. The developer specifies the task, checks the output, and steers again when necessary.
+
+That gives me a practical way to assess a task before delegating it. Does the agent have enough context to start? Can it check whether a change worked? Is the requested outcome small enough for me to review?
+
+Consider migrating a component test. Asking for a conversion gives the agent a destination. Giving it the component source, a nearby example, the test command, and the behavior that must stay covered gives it a way to navigate.
+
+For a first attempt, I would use something like this:
+
+```text
+Migrate the selected component test to React Testing Library.
+
+Read the component and nearby RTL tests first.
+Explain which behaviors the current test covers.
+Keep those behaviors covered without changing production code.
+
+Run the relevant test, typecheck, and lint commands.
+Use the failures to revise the change, with at most three repair attempts.
+If you cannot finish, stop and explain the remaining failure.
+
+Return the diff, the checks you actually ran, and any behavior
+you could not verify. Do not commit or open a pull request.
+```
+
+This is my example, with a deliberately small retry budget. The useful part is making the scope, feedback, and stopping condition explicit. I can adjust those once I know how the workflow behaves.
+
+## Learn supervision before increasing autonomy
+
+The talk describes a progression from basic AI assistance to supervised agent use, then more autonomous and parallel work, and eventually building the tools that support other engineers.
+
+I like that progression because it treats using an agent as an engineering skill. You learn which context matters, recognize recurring mistakes, and get better at noticing when the tool has misunderstood the job.
+
+Faber makes a useful distinction here: his willingness to approve fewer individual operations comes from confidence in his ability to use the tool. He also warns about moving too quickly and producing large changes that the author has not fully reviewed. [That discussion starts around nine minutes in.](https://www.youtube.com/watch?v=o6oYc9-X9Iw&t=534s)
+
+For me, the test for increasing autonomy would be concrete. Can I predict the likely failure modes? Can the agent detect them with the tools it has? Can I inspect the result without reconstructing an entire afternoon of decisions?
+
+If those answers are weak, I would reduce the task size and keep closer checkpoints. There is plenty of useful work an agent can do inside a narrow boundary.
+
+## Review the tests as carefully as the implementation
+
+One of the strongest points in the class is that test code deserves the same scrutiny as production code. A generated test can run successfully and still fail to protect the behavior that matters.
+
+For a test migration, I would check the assertions against the old test and the intended user behavior. Did the conversion keep the error path? Did it replace a meaningful assertion with a broad snapshot? Did a mock quietly remove the condition the test was supposed to exercise?
+
+Those are examples of the questions I would bring to review. A passing command answers whether the current checks pass. Understanding what those checks establish is still part of the author's job.
+
+The talk also encourages pushing back when an agent's explanation feels wrong. I would take that one step further: ask for evidence I can inspect. Point me to the implementation. Show the failing case. Explain which assertion would catch the regression.
+
+An agent agreeing with my objection is not evidence either. The code and its behavior have to settle the question.
+
+## Airbnb's migration shows how feedback compounds
+
+Airbnb's [separate engineering write-up](https://airbnb.tech/infrastructure/accelerating-large-scale-test-migration-with-llms/) makes the feedback loop concrete. The team migrated nearly 3,500 Enzyme test files to React Testing Library in six weeks, against an original estimate of 1.5 years of engineering time for manual work.
+
+Their pipeline advanced files through validation stages and used failures to guide further edits. Relevant component code, nearby tests, and examples supplied context. With retries and that context in place, a bulk run completed 75% of the files in four hours.
+
+For the remaining failures, they grouped common problems, selected small samples, improved the prompts and tooling, and reran the migration. Four days of refinement brought automated completion to 97%. They handled the remaining files manually.
+
+That is a specific test migration with explicit validation, rather than a general productivity benchmark. What I would borrow is the method: make failures visible, fix recurring causes, and recognize when another automated attempt costs more than a human finishing the job.
+
+## Parallel work needs separate environments
+
+Airbnb's example of parallel coding uses [AirDev workspaces](https://www.youtube.com/watch?v=o6oYc9-X9Iw&t=742s): separate cloud environments in which agents can work on different tasks. Faber describes power users running several workspaces at once and emphasizes the surrounding development and review tooling.
+
+The separate environments matter. Two agents editing the same checkout can interfere with each other's files. Separate checkouts help with that, but processes, ports, databases, and credentials can still be shared. A worktree alone does not isolate everything a task might touch.
+
+For my own workflow, I would start with two independent changes and decide how each one will be checked before starting either. A documentation fix and a contained test migration are easier to separate than two features changing the same API.
+
+I would also count the review queue. Five completed agent runs can mean five changes waiting for the same person to understand them. If that queue keeps growing, increasing concurrency is adding unfinished work.
+
+## Measure the whole path to a useful change
+
+Airbnb combines developer sentiment, adoption, and engineering system metrics when assessing these tools. In the talk, Faber explicitly describes the relationship between adoption and PR velocity as a correlation, and says the aggregate metrics are not used to rank individual engineers. [The measurement discussion begins around four minutes in.](https://www.youtube.com/watch?v=o6oYc9-X9Iw&t=239s)
+
+That would shape my first experiment. I would pick one bounded maintenance task, establish the existing test results, and let an agent work through it. Then I would record the time spent providing context, correcting mistakes, reviewing the diff, and getting the change ready for someone else.
+
+I would also record what I had to reject. A fast result that weakens a test or expands the scope creates work that a generation-time metric misses.
+
+After a few tasks, I would look for repeated friction. If the same missing test command or local convention keeps interrupting the agent, I would document it in the repository. If the same kind of change repeatedly needs substantial correction, I would narrow that task or keep doing it myself for now.
+
+The standard I want is straightforward: a change I understand, supported by checks I can inspect, small enough that another engineer can review it without doing my job first.
