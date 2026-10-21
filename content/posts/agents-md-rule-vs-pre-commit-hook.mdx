@@ -1,0 +1,52 @@
+---
+title: "Your AGENTS.md rule is a suggestion. A pre-commit hook is a test."
+date: "2026-10-21"
+tags: ["agents", "ai-engineering", "developer-experience"]
+description: "When a coding agent keeps ignoring a repo convention, a 15-line diff check fails the commit and tells the agent what to do instead. Here is the script, how to verify it, and where it breaks."
+---
+
+Say your team has a `log()` wrapper in `src/lib/diagnostics.ts` that adds request IDs and redacts tokens. The agent keeps writing `console.error(...)` anyway. The reflex is to add a line to AGENTS.md: "Never call console directly, use log()." Sometimes that works. Sometimes it works nine times and misses the tenth, and you only find out in review.
+
+Geoffrey Huntley describes the alternative in [a line Simon Willison quoted](https://simonwillison.net/2026/Oct/13/geoffrey-huntley/): updating the instructions file still leaves a delta that drifts, so he writes a pre-commit hook that checks the git diff for direct calls that bypass his diagnostics module, fails the commit, and injects a prompt telling the agent to use the library. His result is "ten out of ten." That number is one person's report, and I'm relying on that excerpt, not his full essay. The mechanism is what I find useful.
+
+## Why a rule in a file is weaker
+
+An instruction competes for attention with everything else in the context: the task, the files it opened, the pattern it saw in the neighboring module. If the neighboring module uses `console.error`, the agent has a local example that disagrees with your global rule. A hook doesn't compete. It runs after the edit, looks at the result, and the commit either happens or it doesn't. You moved the convention from "the model should remember" to "the repo will refuse."
+
+The second half matters as much as the first. A bare failure says "no." The message in the hook output is what the agent reads next, so it should say what to do instead.
+
+## A hook you can paste
+
+This is a sketch for a TypeScript repo. It looks only at lines added in the staged diff, so existing violations don't block unrelated work.
+
+```sh
+#!/bin/sh
+# .git/hooks/pre-commit (or your hook manager's equivalent)
+hits=$(git diff --cached -U0 --diff-filter=AM -- 'src/*.ts' 'src/*.tsx' ':!src/lib/diagnostics.ts' \
+  | grep -E '^\+[^+]' \
+  | grep -E 'console\.(log|warn|error)\(' \
+  | grep -v 'allow-console')
+if [ -n "$hits" ]; then
+  echo "Commit blocked: new direct console calls." >&2
+  echo "$hits" >&2
+  echo "Use log() from src/lib/diagnostics.ts, re-stage, and commit again." >&2
+  echo "If the call is intentional, add a trailing // allow-console: <reason> comment." >&2
+  exit 1
+fi
+```
+
+Behavior to expect: a plain `console.error(...)` is blocked, the same line with the `allow-console` comment goes through, and `console["log"]("x")` also goes through. That last one is the point of the next section.
+
+## Verify it before you trust it
+
+Don't judge the hook by whether it looks right. Judge it the way you'd judge a test:
+
+1. **It fails when it should.** Make the agent (or yourself) stage a violation and confirm the commit is refused.
+2. **It passes when it should.** Stage a legitimate use, like a CLI entry point that must print to stderr, and confirm there is a way through.
+3. **The agent fixes the cause.** Read the retried commit. A good outcome replaces the call with `log()`. A bad one rewrites the call to dodge the pattern, for example by aliasing `console`. The hook can't tell the difference; you can.
+
+## Where this stops working
+
+A grep matches text, and text has many spellings. The bracket form above slips past it, so does `const c = console; c.error(...)`. If the convention is semantic ("every outbound call goes through our API client"), a regex will either miss variations or flag legitimate code, and an AST-based lint rule is the better tool. If the agent runs with commit hooks disabled, such as `--no-verify`, the hook never executes, so pair it with the same check in CI. And a hook that blocks too often trains people to add escape comments reflexively, which turns it back into a suggestion.
+
+The practical rule: use AGENTS.md for things that guide judgment (how we structure modules, what to read first). Use a hook for the one or two conventions where a violation is detectable in a diff and costly enough to be worth a failed commit. Start with the convention the agent has already broken more than once.
