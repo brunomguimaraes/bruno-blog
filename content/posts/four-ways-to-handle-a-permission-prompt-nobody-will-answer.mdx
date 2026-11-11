@@ -1,0 +1,47 @@
+---
+title: "Four ways to handle a permission prompt nobody will answer"
+date: "2026-11-11"
+tags: ["agents", "claude-code", "developer-experience"]
+description: "Allowlist, deny, don't-ask mode, or skip the checks: what each choice trades away when a coding agent runs on a schedule, and how to pick one per task."
+---
+
+An unattended agent run needs an answer to one question before it starts: what happens when the agent wants something I didn't plan for? There are four defensible answers, and the right one depends on the task, not on a general feeling about safety.
+
+Facts first, from the [permissions docs](https://code.claude.com/docs/en/permissions) and the [2.1.319 changelog](https://code.claude.com/docs/en/changelog). Rules are evaluated deny, then ask, then allow, and the first match wins. Claude Code has a `dontAsk` mode that "auto-denies every call that would otherwise prompt" while still running pre-approved tools. The new `permissions.denyInsteadOfPrompting` setting denies a call that would wait on a prompt and lets the turn continue. I haven't tested how those two overlap in practice, so I'll treat them as one option and flag where I'm unsure.
+
+## Option 1: a tight allowlist, and let it stall
+
+List exactly what the task needs; everything else prompts. Interactively this is the default, and it's fine. Unattended, a prompt nobody answers means the run waits.
+
+Pick it when a stalled run is cheap and visible. A weekly job whose failure someone will notice by Thursday can stall. Its cost is a late result.
+
+## Option 2: deny instead of prompting
+
+Same allowlist, but the unlisted call is refused and the agent keeps going. You get a finished run and a transcript with refusals in it.
+
+Pick it when partial output is useful and you'll read the transcript. The risk is the agent substituting a weaker path and reporting success. A refusal is not a stop signal; it's information the agent will route around. If nobody reads the result closely, this option is worse than stalling, because stalling at least announces itself.
+
+## Option 3: a read-only task shape
+
+Instead of tuning permissions, shrink the task so every needed tool is read-only: "summarize, and write a report file." Allow reads and one write path, deny the rest. The point is that the permission question mostly disappears.
+
+Pick it for reviews, audits and summaries. It fails for anything that must change state, which is most of what people want agents for. It's also a design choice made in the prompt and the allowlist together; neither alone gives it to you.
+
+## Option 4: skip the checks
+
+Bypass permissions entirely and rely on an isolated environment. Reasonable in a disposable container with no credentials worth stealing and no network you care about. Unreasonable anywhere an agent's mistake reaches production, a shared token, or a private repo. The permission system exists to bound mistakes, and an isolated sandbox bounds them a different way. If you're not sure the sandbox really isolates, you don't have this option.
+
+## How I'd choose
+
+Ask two questions. Can a weaker result do harm if nobody notices? And does the task need to write anything outside a scratch area?
+
+- Harm possible, writes needed: Option 1. Let it stall, and accept the late result.
+- Harm unlikely, output reviewed by a human: Option 2.
+- Mostly analysis: Option 3, and Option 2 as the backstop.
+- Disposable environment, nothing sensitive reachable: Option 4.
+
+The default I'd avoid is picking Option 2 because it's the one that makes the dashboard green. Green is the thing it's best at producing and worst at proving.
+
+## Where this breaks down
+
+The four options assume the allowlist is correct, and the first runs of any new task show it isn't. Plan to run a new task attended at least once and let the prompts tell you what to allow. Then choose among the options. Also, deny rules aren't a boundary around a program; the docs note that a Bash deny rule covers the invocation Claude usually produces, not every form of the same program.
