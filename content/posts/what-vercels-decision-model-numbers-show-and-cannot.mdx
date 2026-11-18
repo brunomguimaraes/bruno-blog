@@ -1,0 +1,32 @@
+---
+title: "What Vercel's decision-model numbers show, and what they can't"
+date: "2026-11-18"
+tags: ["ai", "ai-engineering", "product-engineering"]
+description: "Decision models drew about one in four AI Gateway requests in October for 0.53% of spend. That is strong evidence people are calling them, and no evidence that they are right."
+---
+
+[Vercel's November report on AI Gateway traffic](https://vercel.com/blog/ai-gateway-production-index-november-2026) has a figure that will get quoted a lot. Decision models, the category that returns scores and choices instead of text, went from 0.0% of requests in August to 12.8% in September to 26.1% in October. In October they accounted for 0.53% of spend. Vercel puts the per-request cost at about a seventieth of a language model's.
+
+This is real data about real traffic, and it is worth reading carefully, because the headline invites a conclusion the data does not support.
+
+## What it does show
+
+Teams are running a lot of cheap judgment calls. Nearly a third of paid teams used one in October, and about 11% used one without sending any request to a text-generating model. Adoption rises with size: just over one in five of the smallest teams, seven in ten of those above 10 billion tokens a month. If you were wondering whether this is a toy category, the answer is no, people are calling these in production-scale volume.
+
+The spend gap also fits the mechanism. Classification, routing, and filtering run on every input, so the call count is high, and each call needs only a score. A request that returns a probability for pennies per million tokens is a different line item from a paragraph of generated text.
+
+## What it does not show
+
+It says nothing about accuracy. The number of requests tells you teams sent traffic, not that the answers were right or that anyone kept the result. A team might try a decision model in a pre-filter, keep the old path as the real decision, and generate thousands of requests while comparing. High volume with low spend is also exactly what a shadow-mode test looks like. I am describing a possibility the report does not rule out, not a finding.
+
+It is also concentrated. Vercel notes that almost all decision-model volume went to Jev, and that for each dollar spent on Jev, teams spent $64 on Anthropic models. So this is mostly one provider on one gateway, and it says little about how the other models perform or get used. Vercel's data is from its own gateway, its spend figures use published list prices rather than actual bills, and the report counts each model version separately. None of that is hidden; it is in the methodology. It means the 26.1% describes Vercel's customers who route through an AI gateway, which is not the same as developers in general.
+
+The other independent reading this week doesn't fill the gap. [Latent Space's piece](https://www.latent.space/p/jev-revolution) gives early-stage examples from Glean, UiPath, and Workday, mostly prototypes, and reports no accuracy figures. Simon Willison's test of Gemini Decision 1 was four yes/no questions on one video, and he did not check them against the video's contents.
+
+## What to take from it
+
+Treat the Vercel report as evidence of demand and price, and the absence of accuracy data as the actual state of knowledge. The reasonable inference is narrow: if you have a high-volume classification step that you currently run through a reasoning model, it's worth a trial, since others are doing the same at scale and the cost difference is large.
+
+The report cannot tell you whether to trust the output on your data. That takes a labelled sample of your own, and, for anything where a wrong answer is expensive, a fallback path. If you trial one, record what you compared and on how many items so that your result adds a data point rather than a mood.
+
+Where I would change my mind: if one of the providers publishes calibrated accuracy on a public task, or if an independent group reruns the same labelled set across all three, the argument above gets weaker. Until then, "a lot of teams use it" and "it works" are two different claims, and only the first has numbers.
